@@ -2,21 +2,19 @@
 
 package ph.mcmod.cs
 
-import com.nhoryzon.mc.farmersdelight.FarmersDelightMod
 import com.nhoryzon.mc.farmersdelight.registry.ItemsRegistry
+import com.simibubi.create.content.logistics.block.mechanicalArm.ArmInteractionPointType
 import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
 import net.fabricmc.fabric.api.`object`.builder.v1.block.entity.FabricBlockEntityTypeBuilder
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings
 import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags
-import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.FullItemFluidStorage
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage
 import net.fabricmc.loader.api.FabricLoader
-import net.minecraft.block.BlockState
 import net.minecraft.block.Blocks
 import net.minecraft.block.FluidBlock
 import net.minecraft.block.entity.BlockEntityType
@@ -31,7 +29,6 @@ import net.minecraft.tag.BlockTags
 import net.minecraft.tag.ItemTags
 import net.minecraft.text.LiteralText
 import net.minecraft.util.math.Direction
-import net.minecraft.util.registry.Registry
 import ph.mcmod.cs.MyRegistries.MyItems.MUSHROOM_SOUP
 import ph.mcmod.cs.MyRegistries.MyItems.WATER_BOWL
 import ph.mcmod.cs.fluid.AcidFluid
@@ -53,7 +50,7 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
         val TOMATO_SAUCE = FluidBlock(MyFluids.TOMATO_SAUCE, FabricBlockSettings.copyOf(Blocks.WATER))
           .register("tomato_sauce")
           .lang("番茄酱")
-        
+        //以下都是旧项目的，以后要删掉
         @JvmField
         val VERY_LARGE_BARREL = VeryLargeBarrel.TBlock(FabricBlockSettings.copyOf(Blocks.BARREL)
           .allowsSpawning(Blocks::never))
@@ -98,6 +95,10 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
     }
     
     object MyBlockEntityTypes {
+//        @JvmField
+//        val SHAFT: BlockEntityType<ShaftBlockEntity> = FabricBlockEntityTypeBuilder.create(::ShaftBlockEntity).addBlock(AllBlocks.SHAFT.get()).build().register("shaft")
+        
+        //以下都是旧项目的，以后要删掉
         @JvmField
         val VERY_LARGE_BARREL: BlockEntityType<VeryLargeBarrel.TBlockEntity> = FabricBlockEntityTypeBuilder.create(VeryLargeBarrel::TBlockEntity).addBlock(MyBlocks.VERY_LARGE_BARREL).build().register("very_large_barrel")
         @JvmField
@@ -151,7 +152,9 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
           .register("tomato_sauce_bucket")
           .lang("番茄酱桶")
     
-        /*不加入创造模式物品栏，稍后删除。*/
+    
+    
+        //以下都是旧项目的，以后要删掉
         @JvmField
         val VAULT = VeryLargeBarrel.TItem(MyBlocks.VERY_LARGE_BARREL,FabricItemSettings()).register()
         @JvmField
@@ -219,6 +222,7 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
         FluidStorage.ITEM.registerForItems({ itemStack, context -> FullItemFluidStorage(context, Items.BOWL, FluidVariant.of(Fluids.WATER), FluidConstants.BOTTLE) }, WATER_BOWL)
         FluidStorage.ITEM.registerForItems({ itemStack, context -> FullItemFluidStorage(context, Items.BOWL, FluidVariant.of(MyFluids.MUSHROOM_SOUP_STILL), FluidConstants.BOTTLE) }, MUSHROOM_SOUP)
         FluidStorage.ITEM.registerForItems({ itemStack, context -> FullItemFluidStorage(context, Items.BOWL, FluidVariant.of(MyFluids.TOMATO_SAUCE), FluidConstants.BOTTLE) }, ItemsRegistry.TOMATO_SAUCE.get())
+        ArmInteractionPointType.register(ShaftArmInteractionPointType(id("shaft")))
         if (FabricLoader.getInstance().isDevelopmentEnvironment) {
             CommandRegistrationCallback.EVENT.register { dispatcher, dedicated ->
                 dispatcher.register(CommandManager.literal("placeVault")

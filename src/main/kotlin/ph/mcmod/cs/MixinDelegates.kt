@@ -2,11 +2,17 @@
 
 package ph.mcmod.cs
 
+import com.simibubi.create.content.contraptions.base.KineticTileEntity
+import com.simibubi.create.content.contraptions.base.KineticTileEntityRenderer
 import com.simibubi.create.content.contraptions.fluids.actors.ItemDrainItemHandler
 import com.simibubi.create.content.contraptions.fluids.actors.ItemDrainTileEntity
 import com.simibubi.create.content.contraptions.processing.EmptyingByBasin
 import com.simibubi.create.content.contraptions.relays.belt.transport.TransportedItemStack
+import com.simibubi.create.content.contraptions.relays.elementary.BracketedKineticTileEntity
+import com.simibubi.create.content.contraptions.relays.elementary.BracketedKineticTileRenderer
 import com.simibubi.create.foundation.tileEntity.behaviour.belt.TransportedItemStackHandlerBehaviour
+import com.simibubi.create.foundation.tileEntity.renderer.SafeTileEntityRenderer
+import com.simibubi.create.foundation.utility.AnimationTickHolder
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant
@@ -18,6 +24,11 @@ import net.minecraft.advancement.criterion.Criteria
 import net.minecraft.block.BlockState
 import net.minecraft.block.Blocks
 import net.minecraft.block.FluidBlock
+import net.minecraft.block.entity.BlockEntity
+import net.minecraft.client.MinecraftClient
+import net.minecraft.client.render.VertexConsumerProvider
+import net.minecraft.client.render.model.json.ModelTransformation
+import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.command.DataCommandStorage
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
@@ -38,12 +49,15 @@ import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.Identifier
 import net.minecraft.util.hit.BlockHitResult
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Direction
-import net.minecraft.util.math.Vec3d
+import net.minecraft.util.math.*
 import net.minecraft.world.World
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable
+import ph.mcmod.cs.game.RoastingGrill
+import ph.mcmod.kum.get
+import ph.mcmod.kum.isEmpty
 import ph.mcmod.kum.spreadParticles
+import ph.mcmod.kum.toInt
+import java.util.*
 import kotlin.math.min
 
 internal object MixinDelegates {
@@ -183,7 +197,7 @@ internal object MixinDelegates {
         return EmptyingByBasin.canItemBeEmptied(world, stack) || getCampfireCookingRecipe(te, null, ItemVariant.of(stack)) != null
     }
     @JvmStatic
-    fun steam(te: ItemDrainTileEntity, heldItem: TransportedItemStack, cir: CallbackInfoReturnable<Boolean>):Int? {
+    fun steam(te: ItemDrainTileEntity, heldItem: TransportedItemStack, cir: CallbackInfoReturnable<Boolean>): Int? {
         getSteamRecipe(te, ItemVariant.of(heldItem.stack))?.also { recipe ->
             val restTime = heldItem.stack.orCreateNbt.getInt("restTime")
             if (restTime > 0) {
@@ -202,4 +216,79 @@ internal object MixinDelegates {
         }
         return null
     }
+    
+    @JvmStatic
+    fun renderRoastingItem(renderer: BracketedKineticTileRenderer, te: KineticTileEntity, partialTicks: Float, ms: MatrixStack, buffer: VertexConsumerProvider, light: Int, overlay: Int) {
+//        println(1)
+        if (te is RoastingGrill) {
+//            if (partialTicks <= 0.1) {
+//                println(te.roastingStorage.resource)
+//            }
+//            println(2)
+            te.roastingStorage.takeUnless { it.isEmpty }?.also { roastingStorage ->
+//                println(3)
+                val random = Random(0)
+//                ms.push()
+                val itemRenderer = MinecraftClient.getInstance().itemRenderer
+                val modelStack = roastingStorage.resource.toStack().apply {
+                    orCreateNbt.putInt("CustomModelData", 1)
+                }
+                ms.push()
+                ms.translate(0.5, 0.5, 0.5)
+                val axis = KineticTileEntityRenderer.getRotationAxisOf(te)
+                val offset = BracketedKineticTileRenderer.getShaftAngleOffset(axis, te.pos)
+                val time = AnimationTickHolder.getRenderTime(te.world)
+                val angle = (time * te.speed * 3f / 10 + offset) % 360 / 180 * Math.PI.toFloat()
+                ms.multiply(Quaternion(axis[true].unitVector, angle, false))
+                ms.multiply(Quaternion(Vec3f(0f, 1f, 0f), 90f, true))
+                ms.translate(0.0, 0.2, 0.0)
+                val scale = 2.7f
+                ms.scale(scale, scale, scale)
+                itemRenderer.renderItem(modelStack, ModelTransformation.Mode.FIXED, light, overlay, ms, buffer, 0)
+                ms.pop()
+            }
+        }
+    }
+    
+    @JvmStatic
+    fun <T : BlockEntity> testSafeRender(renderer: SafeTileEntityRenderer<T>, te: T, partialTicks: Float, ms: MatrixStack, buffer: VertexConsumerProvider, light: Int, overlay: Int) {
+//        if (te is BracketedKineticTileRenderer) {
+//            println(renderer.isInvalid(te))
+//        }
+        if (te is RoastingGrill) {
+//            println(renderer.isInvalid(te))
+            if (!te.roastingStorage.isEmpty) {
+//                println(renderer.isInvalid(te))
+            }
+        }
+    }
+    
+    @JvmStatic
+    fun writeRoastingNbt(te: BracketedKineticTileEntity, compound: NbtCompound, clientPacket: Boolean) {
+        if (te is RoastingGrill) {
+            compound.put("roastingItem", te.roastingStorage.resource.toNbt())
+        }
+    }
+    
+    @JvmStatic
+    fun readRoastingNbt(te: BracketedKineticTileEntity, compound: NbtCompound, clientPacket: Boolean) {
+        if (te is RoastingGrill) {
+            val itemVariant = ItemVariant.fromNbt(compound.getCompound("roastingItem"))
+//            if (!itemVariant.isBlank) {
+//                println(te.pos)
+//            }
+            te.roastingStorage.variant = itemVariant
+            te.roastingStorage.amount = (!itemVariant.isBlank).toInt().toLong()
+        }
+    }
+    
+    @JvmStatic
+    fun tickRoasting(te: BracketedKineticTileEntity) {
+        if (te is RoastingGrill) {
+            te.roastingStorage.resource.nbt?.apply {
+                putInt("roastingCountdown", getInt("roastingCountdown") - 1)
+            }
+        }
+    }
+    
 }

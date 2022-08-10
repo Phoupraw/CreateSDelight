@@ -22,5 +22,10 @@ object ClientMain {
         BlockRenderLayerMap.INSTANCE.putFluids(RenderLayer.getTranslucent(), MyRegistries.MyFluids.MUSHROOM_SOUP_STILL, MyRegistries.MyFluids.MUSHROOM_SOUP_FLOWING)
         FluidRenderHandlerRegistry.INSTANCE.register(MyRegistries.MyFluids.TOMATO_SAUCE, MyRegistries.MyFluids.TOMATO_SAUCE_FLOWING, SimpleFluidRenderHandler.coloredWater(0xCC0000))
         BlockRenderLayerMap.INSTANCE.putFluids(RenderLayer.getTranslucent(), MyRegistries.MyFluids.TOMATO_SAUCE, MyRegistries.MyFluids.TOMATO_SAUCE_FLOWING)
+        
+//        BlockEntityRendererRegistry.register(MyRegistries.MyBlockEntityTypes.SHAFT) {
+//            @Suppress("UNCHECKED_CAST")//BlockEntityRenderer从语义上说，是逆变的，所以下方转换不会出问题。
+//            ShaftBlockEntity.Renderer(it) as BlockEntityRenderer<ShaftBlockEntity>
+//        }
     }
 }

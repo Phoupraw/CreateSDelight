@@ -129,5 +129,6 @@ open class RegistryHelper(val namespace: String, itemGroupIcon: (() -> ItemStack
         return this
     }
     
+    fun id(path:String):Identifier = Identifier(namespace, path)
     fun ItemSettings(itemGroup: ItemGroup = this.itemGroup): FabricItemSettings = FabricItemSettings().group(itemGroup)
 }
