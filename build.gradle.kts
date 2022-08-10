@@ -46,6 +46,18 @@ repositories {
     maven("https://maven.jamieswhiteshirt.com/libs-release") // Reach Entity Attributes
     maven("https://jitpack.io/") // Mixin Extras, fabric ASM, nbtcrafting testing dependencies
     maven("D:\\CCC\\Documents\\01_Programming\\Fabric Mod\\farmers-delight-fabric-1.18.2-0.2.1\\publish")
+    
+//    maven ("https://api.modrinth.com/maven") // LazyDFU, Suggestion Tweaker
+//    maven ("https://maven.terraformersmc.com/releases/") // Mod Menu, EMI
+//    maven ("https://maven.shedaniel.me/") // Cloth Config, REI
+//    maven ("https://mvn.devos.one/snapshots/") // Create, Porting Lib, Forge Tags, Milk Lib
+//    maven ("https://cursemaven.com") // Forge Config API Port
+//    maven ("https://maven.tterrag.com/") // Registrate and Flywheel
+//    maven ("https://maven.cafeteria.dev") // Fake Player API
+//    maven ("https://maven.jamieswhiteshirt.com/libs-release") // Reach Entity Attributes
+//    maven ("https://jitpack.io/") // Mixin Extras, fabric ASM
+//    maven ("https://dvs1.progwml6.com/files/maven/") // JEI
+//    maven ("https://maven.parchmentmc.org") // Parchment mappings
 }
 dependencies {
     val minecraftVersion: String by project
@@ -84,7 +96,7 @@ dependencies {
     
     // create setup
     val create_version: String by project
-    modImplementation("com.simibubi:Create:${create_version}")// { isTransitive = false }
+    modImplementation("com.simibubi.create:create-fabric-${minecraftVersion}:${create_version}")// { isTransitive = false }
 //    val port_lib_version: String by project
 //    val port_lib_hash: String by project
 //    modImplementation("io.github.fabricators_of_create:Porting-Lib:${port_lib_version}+${minecraftVersion}-dev.${port_lib_hash}")
