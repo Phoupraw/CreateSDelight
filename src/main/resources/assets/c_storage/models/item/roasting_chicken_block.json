@@ -1,4 +1,5 @@
 {
+	"comment": "没有盘子的烤鸡",
 	"credit": "Made with Blockbench",
 	"parent": "block/block",
 	"textures": {
