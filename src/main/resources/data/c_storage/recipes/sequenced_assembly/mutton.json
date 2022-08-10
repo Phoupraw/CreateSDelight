@@ -1,0 +1,23 @@
+{
+	"type": "create:sequenced_assembly",
+	"ingredient": {"item": "mutton"},
+	"transitionalItem": {"item": "mutton"},
+	"sequence": [
+		{
+			"type": "create:pressing",
+			"ingredients": [{"item": "mutton"}],
+			"results": [{"item": "mutton"}]
+		},
+		{
+			"type": "create:deploying",
+			"ingredients": [
+				{"item": "mutton"},
+				{"tag": "farmersdelight:tools/knives"}
+			],
+			"results": [{"item": "mutton"}],
+			"keepHeldItem": true
+		}
+	],
+	"results": [{"item": "farmersdelight:mutton_chops", "count": 2}],
+	"loops": 1
+}

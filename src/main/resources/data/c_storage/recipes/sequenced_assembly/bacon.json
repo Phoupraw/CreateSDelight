@@ -1,0 +1,19 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {"item": "porkchop"},
+  "transitionalItem": {"item": "porkchop"},
+  "sequence": [
+    {
+      "type": "create:pressing",
+      "ingredients": [{"item": "porkchop"}],
+      "results": [{"item": "porkchop"}]
+    },
+    {
+      "type": "create:crushing",
+      "ingredients": [{"item": "porkchop"}],
+      "results": [{"item": "porkchop"}]
+    }
+  ],
+  "results": [{"item": "farmersdelight:bacon", "count": 2}],
+  "loops": 1
+}

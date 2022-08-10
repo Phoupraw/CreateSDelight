@@ -1,0 +1,19 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {"item": "farmersdelight:ham"},
+  "transitionalItem": {"item": "porkchop"},
+  "sequence": [
+    {
+      "type": "create:cutting",
+      "ingredients": [{"item": "porkchop"}],
+      "results": [{"item": "porkchop"}]
+    },
+    {
+      "type": "create:cutting",
+      "ingredients": [{"item": "porkchop"}],
+      "results": [{"item": "fporkchop"}, {"item": "bone"}]
+    }
+  ],
+  "results": [{"item": "porkchop", "count": 2}],
+  "loops": 1
+}

@@ -1,0 +1,9 @@
+{
+	"type": "create:deploying",
+	"ingredients": [
+		{"item": "melon"},
+		{"tag": "farmersdelight:tools/knives"}
+	],
+	"results": [{"item": "melon_slice", "count": 9}],
+	"keepHeldItem": true
+}

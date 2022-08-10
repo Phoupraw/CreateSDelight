@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "package": "ph.mcmod.cs.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "MixinDataCommandStorage",
+    "MixinFluidBlock",
+    "MixinItemDrainItemHandler",
+    "MixinItemDrainTileEntity",
+    "MixinItems",
+    "MixinMinecraftServer"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

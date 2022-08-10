@@ -1,0 +1,23 @@
+{
+	"credit": "Made with Blockbench",
+	"parent": "block/block",
+	"textures": {
+		"4": "c_storage:block/very_large_barrel_edge",
+		"5": "c_storage:block/very_large_barrel_arris",
+		"particle": "c_storage:block/very_large_barrel_side_connected"
+	},
+	"elements": [
+		{
+			"from": [0, 0, 0],
+			"to": [16, 16, 16],
+			"faces": {
+				"north": {"uv": [0, 16, 16, 0], "texture": "#5", "cullface": "north"},
+				"east": {"uv": [0, 0, 16, 16], "texture": "#4", "cullface": "east"},
+				"south": {"uv": [16, 0, 0, 16], "rotation": 90, "texture": "#4", "cullface": "south"},
+				"west": {"uv": [0, 0, 16, 16], "rotation": 270, "texture": "#5", "cullface": "west"},
+				"up": {"uv": [0, 0, 16, 16], "rotation": 180, "texture": "#4", "cullface": "up"},
+				"down": {"uv": [0, 0, 16, 16], "rotation": 270, "texture": "#5", "cullface": "down"}
+			}
+		}
+	]
+}

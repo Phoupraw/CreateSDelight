@@ -1,0 +1,11 @@
+{
+	"type": "create:deploying",
+	"ingredients": [
+		{"item": "farmersdelight:chocolate_pie"},
+		{"tag": "farmersdelight:tools/knives"}
+	],
+	"results": [
+		{"item": "farmersdelight:chocolate_pie_slice", "count": 4}
+	],
+	"keepHeldItem": true
+}

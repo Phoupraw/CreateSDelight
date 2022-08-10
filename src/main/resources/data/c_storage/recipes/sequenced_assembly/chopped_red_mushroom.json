@@ -1,0 +1,16 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {"item": "minecraft:red_mushroom"},
+  "transitionalItem": {"item": "c_storage:chopping_red_mushroom"},
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [{"item": "c_storage:chopping_red_mushroom"}, {"tag": "farmersdelight:tools/knives"}],
+      "results": [{"item": "c_storage:chopping_red_mushroom"}]
+    }
+  ],
+  "results": [
+    {"item": "c_storage:chopped_red_mushroom", "count": 2}
+  ],
+  "loops": 4
+}

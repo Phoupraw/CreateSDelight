@@ -1,0 +1,10 @@
+{
+  "type": "create:mixing",
+  "ingredients": [
+    {"item": "minecraft:red_mushroom"},
+    {"item": "minecraft:brown_mushroom"},
+    {"fluid": "minecraft:water", "amount": 27000}
+  ],
+  "results": [{"fluid": "c_storage:mushroom_soup", "amount": 27000}],
+  "heatRequirement": "heated"
+}

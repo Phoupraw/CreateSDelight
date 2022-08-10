@@ -1,0 +1,11 @@
+{
+	"type": "create:deploying",
+	"ingredients": [
+		{"item": "minecraft:cake"},
+		{"tag": "farmersdelight:tools/knives"}
+	],
+	"results": [
+		{"item": "farmersdelight:cake_slice", "count": 7}
+	],
+	"keepHeldItem": true
+}

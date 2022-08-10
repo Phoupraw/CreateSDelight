@@ -1,0 +1,5 @@
+{
+  "type": "create:filling1",
+  "ingredients": [{"item": "minecraft:bowl"}, {"fluidTag": "water", "amount": 27000}],
+  "results": [{"item": "c_storage:water_bowl"}]
+}

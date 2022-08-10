@@ -1,0 +1,18 @@
+{
+	"type": "create:sequenced_assembly",
+	"ingbrownient": {"item": "farmersdelight:brown_mushroom_colony"},
+	"transitionalItem": {"item": "farmersdelight:brown_mushroom_colony"},
+	"sequence": [
+		{
+			"type": "create:deploying",
+			"ingbrownients": [
+				{"item": "farmersdelight:brown_mushroom_colony"},
+				{"tag": "farmersdelight:tools/knives"}
+			],
+			"results": [{"item": "farmersdelight:brown_mushroom_colony"}],
+			"keepHeldItem": true
+		}
+	],
+	"results": [{"item": "brown_mushroom", "count": 5}],
+	"loops": 2
+}

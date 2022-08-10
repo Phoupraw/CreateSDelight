@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "c_storage",
+  "version": "${version}",
+  "name": "CapacityStorage",
+  "description": "translate",
+  "authors": ["Phoupraw"],
+  "contact": {
+    "homepage": "https://www.mcmod.cn/class/TODO.html",
+    "issues": "https://github.com/Phoupraw/TODO/issues"
+  },
+  "license": "TODO",
+  "icon": "assets/c_storage/icon.png",
+  "environment": "*",
+  "mixins": ["c_storage.mixins.json"],
+  "entrypoints": {
+    "main": ["ph.mcmod.cs.Main::init"],
+    "client": ["ph.mcmod.cs.ClientMain::init"]
+  },
+  "depends": {
+    "minecraft": ">=1.18.2",
+    "fabricloader": "*",
+    "fabric": "*",
+    "fabric-language-kotlin": "*",
+    "advanced_runtime_resource_pack": ">=0.5.7"
+  },
+  "suggests": {
+    "iceberg": "*"
+  },
+  "custom": {
+    "loom:injected_interfaces": {
+    }
+  },
+  "accessWidener": "c_storage.accessWidener"
+}

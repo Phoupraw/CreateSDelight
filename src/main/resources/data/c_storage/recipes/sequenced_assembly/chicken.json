@@ -1,0 +1,26 @@
+{
+	"type": "create:sequenced_assembly",
+	"ingredient": {"item": "chicken"},
+	"transitionalItem": {"item": "chicken"},
+	"sequence": [
+		{
+			"type": "create:pressing",
+			"ingredients": [{"item": "chicken"}],
+			"results": [{"item": "chicken"}]
+		},
+		{
+			"type": "create:deploying",
+			"ingredients": [
+				{"item": "chicken"},
+				{"tag": "farmersdelight:tools/knives"}
+			],
+			"results": [
+				{"item": "chicken"},
+				{"item": "bone_meal"}
+			],
+			"keepHeldItem": true
+		}
+	],
+	"results": [{"item": "farmersdelight:chicken_cuts", "count": 2}],
+	"loops": 1
+}

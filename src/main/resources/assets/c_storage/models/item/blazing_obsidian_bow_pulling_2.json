@@ -1,0 +1,6 @@
+{
+    "parent": "item/bow",
+    "textures": {
+        "layer0": "trifle:item/blazing_obsidian_bow_pulling_2"
+    }
+}

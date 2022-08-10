@@ -1,0 +1,26 @@
+{
+	"type": "create:sequenced_assembly",
+	"ingredient": {"item": "cod"},
+	"transitionalItem": {"item": "cod"},
+	"sequence": [
+		{
+			"type": "create:pressing",
+			"ingredients": [{"item": "cod"}],
+			"results": [{"item": "cod"}]
+		},
+		{
+			"type": "create:deploying",
+			"ingredients": [
+				{"item": "cod"},
+				{"tag": "farmersdelight:tools/knives"}
+			],
+			"results": [
+				{"item": "cod"},
+				{"item": "bone_meal"}
+			],
+			"keepHeldItem": true
+		}
+	],
+	"results": [{"item": "farmersdelight:cod_slice", "count": 2}],
+	"loops": 1
+}

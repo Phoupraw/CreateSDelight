@@ -1,0 +1,26 @@
+{
+	"type": "create:sequenced_assembly",
+	"ingredient": {"item": "farmersdelight:smoked_ham"},
+	"transitionalItem": {"item": "farmersdelight:smoked_ham"},
+	"sequence": [
+		{
+			"type": "create:cutting",
+			"ingredients": [{"item": "farmersdelight:smoked_ham"}],
+			"results": [{"item": "farmersdelight:smoked_ham"}]
+		},
+		{
+			"type": "create:deploying",
+			"ingredients": [
+				{"item": "farmersdelight:smoked_ham"},
+				{"tag": "farmersdelight:tools/knives"}
+			],
+			"results": [
+				{"item": "farmersdelight:smoked_ham"},
+				{"item": "bone"}
+			],
+			"keepHeldItem": true
+		}
+	],
+	"results": [{"item": "cooked_porkchop", "count": 2}],
+	"loops": 1
+}

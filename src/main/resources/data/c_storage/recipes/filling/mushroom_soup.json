@@ -1,0 +1,5 @@
+{
+  "type": "create:filling1",
+  "ingredients": [{"item": "minecraft:bowl"}, {"fluid": "c_storage:mushroom_soup", "amount": 27000}],
+  "results": [{"item": "c_storage:mushroom_soup"}]
+}

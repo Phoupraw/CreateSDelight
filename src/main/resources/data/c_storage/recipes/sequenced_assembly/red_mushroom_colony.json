@@ -1,0 +1,18 @@
+{
+	"type": "create:sequenced_assembly",
+	"ingredient": {"item": "farmersdelight:red_mushroom_colony"},
+	"transitionalItem": {"item": "farmersdelight:red_mushroom_colony"},
+	"sequence": [
+		{
+			"type": "create:deploying",
+			"ingredients": [
+				{"item": "farmersdelight:red_mushroom_colony"},
+				{"tag": "farmersdelight:tools/knives"}
+			],
+			"results": [{"item": "farmersdelight:red_mushroom_colony"}],
+			"keepHeldItem": true
+		}
+	],
+	"results": [{"item": "red_mushroom", "count": 5}],
+	"loops": 2
+}

@@ -1,0 +1,12 @@
+{
+	"type": "create:deploying",
+	"ingredients": [
+		{"item": "farmersdelight:rice_panicle"},
+		{"tag": "farmersdelight:tools/knives"}
+	],
+	"results": [
+		{"item": "farmersdelight:rice"},
+		{"item": "farmersdelight:straw"}
+	],
+	"keepHeldItem": true
+}

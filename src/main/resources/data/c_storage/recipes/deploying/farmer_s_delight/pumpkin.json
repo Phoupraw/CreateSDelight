@@ -1,0 +1,11 @@
+{
+	"type": "create:deploying",
+	"ingredients": [
+		{"item": "minecraft:pumpkin"},
+		{"tag": "farmersdelight:tools/knives"}
+	],
+	"results": [
+		{"item": "farmersdelight:pumpkin_slice", "count": 4}
+	],
+	"keepHeldItem": true
+}

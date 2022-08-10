@@ -1,0 +1,31 @@
+{
+	"type": "create:sequenced_assembly",
+	"ingredient": {"item": "oak_log"},
+	"transitionalItem": {"item": "oak_log"},
+	"sequence": [
+		{
+			"type": "create:deploying",
+			"ingredients": [
+				{"item": "oak_log"},
+				{"tag": "forge:tools/axes"}
+			],
+			"results": [
+				{"item": "oak_log"}
+			],
+			"keepHeldItem": true
+		},
+		{
+			"type": "create:cutting",
+			"ingredients": [
+				{"item": "oak_log"}
+			],
+			"results": [
+				{"item": "oak_log"},
+				{"item": "stripped_oak_log"}
+			],
+			"processingTime": 50
+		}
+	],
+	"results": [{"item": "farmersdelight:tree_bark"}],
+	"loops": 1
+}

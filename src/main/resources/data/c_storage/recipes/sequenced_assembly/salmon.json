@@ -1,0 +1,26 @@
+{
+	"type": "create:sequenced_assembly",
+	"ingredient": {"item": "salmon"},
+	"transitionalItem": {"item": "salmon"},
+	"sequence": [
+		{
+			"type": "create:pressing",
+			"ingredients": [{"item": "salmon"}],
+			"results": [{"item": "salmon"}]
+		},
+		{
+			"type": "create:deploying",
+			"ingredients": [
+				{"item": "salmon"},
+				{"tag": "farmersdelight:tools/knives"}
+			],
+			"results": [
+				{"item": "salmon"},
+				{"item": "bone_meal"}
+			],
+			"keepHeldItem": true
+		}
+	],
+	"results": [{"item": "farmersdelight:salmon_slice", "count": 2}],
+	"loops": 1
+}

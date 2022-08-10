@@ -1,0 +1,19 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {"item": "beef"},
+  "transitionalItem": {"item": "beef"},
+  "sequence": [
+    {
+      "type": "create:cutting",
+      "ingredients": [{"item": "beef"}],
+      "results": [{"item": "beef"}]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [{"item": "beef"}],
+      "results": [{"item": "beef"}]
+    }
+  ],
+  "results": [{"item": "farmersdelight:minced_beef", "count": 2}],
+  "loops": 1
+}
