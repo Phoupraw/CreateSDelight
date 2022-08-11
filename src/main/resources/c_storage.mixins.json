@@ -3,6 +3,8 @@
   "package": "ph.mcmod.cs.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "MixinBasinRenderer",
+    "MixinBasinTileEntity",
     "MixinBracketedKineticTileEntity",
     "MixinBracketedKineticTileRenderer",
     "MixinDataCommandStorage",
