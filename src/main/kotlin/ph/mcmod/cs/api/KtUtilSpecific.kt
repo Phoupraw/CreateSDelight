@@ -25,7 +25,8 @@ import java.util.function.Predicate
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-//-----
+infix fun Double.modAndDiv(divisor:Number): Double = this % divisor.toDouble() / divisor.toDouble()
+infix fun Float.modAndDiv(divisor:Number): Float = this % divisor.toFloat() / divisor.toFloat()
 
 
 
@@ -39,45 +40,3 @@ import kotlin.reflect.KProperty
 
 
 
-interface KEvent<T> {
-    val callbacks: Iterable<T>
-    operator fun plusAssign(callback: T)
-    operator fun minusAssign(callback: T)
-}
-
-open class KEventImpl<T> : KEvent<T> {
-    private val _callbacks: MutableCollection<T> = mutableListOf()
-    override val callbacks: Iterable<T> get() = _callbacks
-    
-    override operator fun plusAssign(callback: T) {
-        _callbacks += callback
-    }
-    
-    override operator fun minusAssign(callback: T) {
-        _callbacks -= callback
-    }
-}
-
-class KEvent0 : KEventImpl<() -> Unit>(), () -> Unit {
-    override operator fun invoke() {
-        for (callback in callbacks) callback()
-    }
-}
-
-class KEvent1<T> : KEventImpl<(T) -> Unit>(),(T) -> Unit {
-    override operator fun invoke(t: T) {
-        for (callback in callbacks) callback(t)
-    }
-}
-
-class KEvent2<T, U> : KEventImpl<(T, U) -> Unit>(),(T, U) -> Unit {
-    override operator fun invoke(t: T, u: U) {
-        for (callback in callbacks) callback(t, u)
-    }
-}
-
-class KEvent3<T, U, V> : KEventImpl<(T, U, V) -> Unit>() ,(T, U, V) -> Unit{
-    override operator fun invoke(t: T, u: U, v: V) {
-        for (callback in callbacks) callback(t, u, v)
-    }
-}

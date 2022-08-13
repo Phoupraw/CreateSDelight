@@ -17,6 +17,8 @@ import com.simibubi.create.content.contraptions.relays.elementary.BracketedKinet
 import com.simibubi.create.foundation.tileEntity.behaviour.belt.TransportedItemStackHandlerBehaviour
 import com.simibubi.create.foundation.tileEntity.renderer.SafeTileEntityRenderer
 import com.simibubi.create.foundation.utility.AnimationTickHolder
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant
@@ -33,7 +35,6 @@ import net.minecraft.block.entity.BlockEntity
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.render.model.json.ModelTransformation
-import net.minecraft.client.render.model.json.Transformation
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.command.DataCommandStorage
 import net.minecraft.entity.player.PlayerEntity
@@ -60,11 +61,9 @@ import net.minecraft.util.shape.VoxelShapes
 import net.minecraft.world.World
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args
+import ph.mcmod.cs.game.FTemperature
 import ph.mcmod.cs.game.RoastingGrill
-import ph.mcmod.kum.get
-import ph.mcmod.kum.isEmpty
-import ph.mcmod.kum.spreadParticles
-import ph.mcmod.kum.toInt
+import ph.mcmod.kum.*
 import java.util.*
 import kotlin.math.*
 
@@ -225,6 +224,7 @@ internal object MixinDelegates {
         return null
     }
     
+    @Environment(EnvType.CLIENT)
     @JvmStatic
     fun renderRoastingItem(renderer: BracketedKineticTileRenderer, te: KineticTileEntity, partialTicks: Float, ms: MatrixStack, buffer: VertexConsumerProvider, light: Int, overlay: Int) {
 //        println(1)
@@ -249,6 +249,7 @@ internal object MixinDelegates {
                 val angle = (time * te.speed * 3f / 10 + offset) % 360 / 180 * Math.PI.toFloat()
                 ms.multiply(Quaternion(axis[true].unitVector, angle, false))
                 ms.multiply(Quaternion(Vec3f(0f, 1f, 0f), 90f, true))
+//                ms.translate(-0.5, -0.5, -0.5)
                 ms.translate(0.0, 0.2, 0.0)
                 val scale = 3f
                 ms.scale(scale, scale, scale)
@@ -299,28 +300,59 @@ internal object MixinDelegates {
         }
     }
     
+    private val boilingPoses = mutableSetOf<BlockPos>()
+    private fun mapTemperature(te: BasinTileEntity): Double {
+        return ((te as FTemperature).temperature - 25) / 75
+    }
     @JvmStatic
     fun tickBoil(te: BasinTileEntity) {
-        val world = te.world ?: return
-        val pos = te.pos
-        if (run {
-              val upPos = pos.up()
-              VoxelShapes.adjacentSidesCoverSquare(te.cachedState.getOutlineShape(world, pos), world.getBlockState(upPos).getOutlineShape(world, upPos), Direction.DOWN)
-          } && world.getBlockState(pos.down()).isIn(AllTags.AllBlockTags.FAN_HEATERS.tag)) {
-            if (run {
-                  Transaction.openOuter().use { transaction ->
-                      for (view in (te.getFluidStorage(null) ?: return@use).iterator(transaction)) {
-                          if (view.resource.fluid.isIn(FluidTags.WATER)) {
-                              return@run true
-                          }
+        val t1 = mapTemperature(te)
+        val t2 = t1.pow(3)
+        (te as FTemperature).apply {
+            animationTicks += t2
+        }
+        val world = te.world as? ServerWorld ?: return
+        val blockPos = te.pos
+        if (world.getBlockState(blockPos.down()).isIn(AllTags.AllBlockTags.FAN_HEATERS.tag) && run {
+              Transaction.openOuter().use { transaction ->
+                  for (view in (te.getFluidStorage(null) ?: return@use).iterator(transaction)) {
+                      if (view.resource.fluid.isIn(FluidTags.WATER)) {
+                          return@run true
                       }
                   }
-                  false
-              }) {
-              
-            }
+              }
+              false
+          }) {
             
+            (te as FTemperature).apply {
+                temperature = min(100.0, temperature + 0.5)
+            }
+//            boilingPoses += blockPos
+            val pressure = run {
+                val upPos = blockPos.up()
+                VoxelShapes.adjacentSidesCoverSquare(te.cachedState.getOutlineShape(world, blockPos), world.getBlockState(upPos).getOutlineShape(world, upPos), Direction.UP)
+            }
+            if (pressure) {
+            
+            }
+            val pos = blockPos.toCenter()
+            val random = world.random
+            if (random.nextDouble() < t2) {
+                if (random.nextInt(2) == 0) {
+                    world.spreadParticles(ParticleTypes.SPLASH, false, pos, 0.1, 0.0, 1)
+                    world.spreadParticles(ParticleTypes.BUBBLE, false, pos, 0.1, 0.0, 1)
+                    if (random.nextInt(4) == 0) {
+                        world.spreadParticles(ParticleTypes.POOF, false, pos, 0.1, 0.0, 1)
+                    }
+                }
+            }
+        } else {
+            (te as FTemperature).apply {
+                temperature = max(25.0, temperature - 0.5)
+            }
+//            boilingPoses-=blockPos
         }
+        te.notifyUpdate()
     }
     
     @JvmStatic
@@ -331,30 +363,22 @@ internal object MixinDelegates {
         }
         val origin = MathHelper.clamp(value, min, max)
         return origin
-        val world = te.world ?: return origin
-        val fluidLevel = value + 0.3f
-        val amplitude = min(min(fluidLevel, 0.15f), 1 - fluidLevel)
-        val floating = (sin((world.time + partialTicks) % 20 / 20 * PI * 2) * amplitude).toFloat()
-        val offset =
-          if (value - amplitude < min)
-              min - (value - amplitude)
-          else if (value + amplitude > max)
-              max - (value + amplitude)
-          else 0f
-        return value + floating + offset
     }
     
+    @Environment(EnvType.CLIENT)
     @JvmStatic
     fun changeHeight(renderer: BasinRenderer, args: Args, te: BasinTileEntity, partialTicks: Float, ms: MatrixStack, buffer: VertexConsumerProvider, light: Int, overlay: Int, fluidLevel: Float, level: Float, pos: BlockPos, random: Random, inv: Storage<ItemVariant>, stacksSize: Int, stacks: List<ItemStack>, anglePartition: Float, stack: ItemStack) {
+        val t1 = mapTemperature(te)
         val world = te.world ?: return
         val hashCode = stack.item.hashCode()
         val hashOffset = hashCode.toDouble() / Int.MAX_VALUE
+        val amplitude = min(min(fluidLevel, 0.15f), 1 - fluidLevel) * t1.pow(3)
         val baseVector = args.get<Vec3d>(0)
         val degree = args.get<Double>(1)
-        val amplitude = min(min(fluidLevel, 0.15f), 1 - fluidLevel)
-        val cycle0 = 29
-        val partial0 = ((world.time + partialTicks) % cycle0 / cycle0 + hashOffset) * PI * 2
-        val sin0 = sin(partial0)
+        val cycle0 = 229
+        val ticks = (te as FTemperature).animationTicks + partialTicks  * t1.pow(3)
+        val partial0 = (ticks % cycle0 / cycle0 + hashOffset) * PI * 2
+        val sin0 = sin(sin(partial0) * PI * 2)
         val floating = (sin0 * amplitude)
         val value = baseVector.y
         val min = 0.125
@@ -365,27 +389,41 @@ internal object MixinDelegates {
           else if (value + amplitude > max)
               max - (value + amplitude)
           else 0.0
-        args[0] = Vec3d(baseVector.x
-          /** (1 + sin0 * 0.5) */
-          , value + floating + offset, baseVector.z)
+        args[0] = Vec3d(baseVector.x/* (1 + sin0 * 0.5) */, value + floating + offset, baseVector.z)
         val cycle1 = 1397
         val partial1 = ((world.time + partialTicks) % cycle1 / cycle1 + hashOffset) * PI * 2
         val sin1 = sin(partial1)
-        args[1] = degree + sin1 * 360 * hashOffset.sign
+//        args[1] = degree + sin1 * 360 * hashOffset.sign
         
     }
-    
+    @Environment(EnvType.CLIENT)
     @JvmStatic
     fun rotate(renderer: BasinRenderer, te: BasinTileEntity, partialTicks: Float, ms: MatrixStack, buffer: VertexConsumerProvider, light: Int, overlay: Int, fluidLevel: Float, level: Float, pos: BlockPos, random: Random, inv: Storage<ItemVariant>, stackCount: Int, stacks: MutableList<ItemStack>, anglePartition: Float, stack: ItemStack) {
         val world = te.world ?: return
         val hashCode = stack.item.hashCode()
         val hashOffset = hashCode.toDouble() / Int.MAX_VALUE
-        val cycle1 = 397
-        val partial1 = ((world.time + partialTicks) % cycle1 / cycle1 + hashOffset) * PI * 2
-        val sin1 = sin(partial1)
+        val t1 = mapTemperature(te)
+        val ticks = (te as FTemperature).animationTicks + partialTicks  * t1.pow(3)
+        fun cycle(period: Int) = sin((ticks % period / period + hashOffset) * PI * 2) * 360
+//        infix fun Float.cycle(cycle:Int) = this modAndDiv cycle
+        val amplitude = min(min(fluidLevel, 0.15f), 1 - fluidLevel)
+
+//        val cycle1 = 697
+//        val partial1 = ((world.time + partialTicks) % cycle1 / cycle1 + hashOffset) * PI * 2
+//        val sin1 = sin(partial1)
+        val translation = 4.0 / 30
+//        ms.translate(0.0,0.0,0.0)
+//        val degree = sin(partial1) * 360
+//        val radian = degree / 180 * PI
+//        ms.translate(0.0,2.0,0.0)
+        ms.translate(0.0, translation, 0.0)
         TransformStack.cast(ms)
-          .rotateX(sin(partial1) * 180)
-          .rotateZ(cos(partial1)*180)
+          .rotateX(cycle(397))
+          .rotateY(cycle(597))
+          .rotateZ(cycle(797))
+        ms.translate(0.0, -translation, 0.0)
+
+//        ms.translate(-translation,-translation,-translation)
     }
     
 }
