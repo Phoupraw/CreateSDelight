@@ -12,6 +12,8 @@ import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityType
 import net.minecraft.fluid.Fluid
 import net.minecraft.item.*
+import net.minecraft.particle.ParticleEffect
+import net.minecraft.particle.ParticleType
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerType
 import net.minecraft.tag.TagKey
@@ -81,10 +83,12 @@ open class RegistryHelper(val namespace: String, itemGroupIcon: (() -> ItemStack
         registeredItems += this
         return ph.mcmod.kum.register(this, Registry.ITEM, namespace, path)
     }
+    
     fun <T : Fluid> T.register(path: String): T {
         registeredFluids += this
         return ph.mcmod.kum.register(this, Registry.FLUID, namespace, path)
     }
+    
     fun <T : BlockItem> T.register(): T {
         registeredItems += this
         return ph.mcmod.kum.register(this)
@@ -101,6 +105,7 @@ open class RegistryHelper(val namespace: String, itemGroupIcon: (() -> ItemStack
         return ph.mcmod.kum.register(this, BuiltinRegistries.PLACED_FEATURE, id.namespace, id.path)
     }
     
+    fun <T : ParticleEffect, S : ParticleType<T>> S.register(path: String): S = ph.mcmod.kum.register(this, Registry.PARTICLE_TYPE, namespace, path)
     fun <T : BlockEntity> BlockEntityType<T>.register(path: String): BlockEntityType<T> = ph.mcmod.kum.register(this, Registry.BLOCK_ENTITY_TYPE, namespace, path)
     fun <E : Entity, T : EntityType<in E>> T.register(path: String): T = ph.mcmod.kum.register(this, Registry.ENTITY_TYPE, namespace, path)
     
@@ -129,6 +134,6 @@ open class RegistryHelper(val namespace: String, itemGroupIcon: (() -> ItemStack
         return this
     }
     
-    fun id(path:String):Identifier = Identifier(namespace, path)
+    fun id(path: String): Identifier = Identifier(namespace, path)
     fun ItemSettings(itemGroup: ItemGroup = this.itemGroup): FabricItemSettings = FabricItemSettings().group(itemGroup)
 }

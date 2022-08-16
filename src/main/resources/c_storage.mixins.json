@@ -3,20 +3,19 @@
   "package": "ph.mcmod.cs.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "MixinBasinRenderer",
+    "AccessDepotBehaviour",
     "MixinBasinTileEntity",
     "MixinBracketedKineticTileEntity",
-    "MixinBracketedKineticTileRenderer",
     "MixinDataCommandStorage",
+    "MixinDepotTileEntity",
     "MixinFluidBlock",
     "MixinItemDrainItemHandler",
     "MixinItemDrainTileEntity",
     "MixinItems",
     "MixinMinecraftServer",
-    "MixinSafeTileEntityRenderer"
+    "MixinSpoutTileEntity"
   ],
-  "client": [
-  ],
+  "client": ["MixinBasinRenderer", "MixinBracketedKineticTileRenderer", "MixinDepotRenderer", "MixinSafeTileEntityRenderer"],
   "injectors": {
     "defaultRequire": 1
   }

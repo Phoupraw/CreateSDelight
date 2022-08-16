@@ -3,11 +3,15 @@
 package ph.mcmod.cs
 
 import com.nhoryzon.mc.farmersdelight.registry.ItemsRegistry
+import com.simibubi.create.api.behaviour.BlockSpoutingBehaviour
 import com.simibubi.create.content.logistics.block.mechanicalArm.ArmInteractionPointType
 import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
 import net.fabricmc.fabric.api.`object`.builder.v1.block.entity.FabricBlockEntityTypeBuilder
+import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback
+import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings
+import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes
 import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage
@@ -18,11 +22,17 @@ import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.block.Blocks
 import net.minecraft.block.FluidBlock
 import net.minecraft.block.entity.BlockEntityType
+import net.minecraft.client.particle.BubblePopParticle
+import net.minecraft.client.particle.FlameParticle
+import net.minecraft.client.texture.SpriteAtlasTexture
 import net.minecraft.command.argument.BlockPosArgumentType
 import net.minecraft.entity.effect.StatusEffectInstance
 import net.minecraft.entity.effect.StatusEffects
 import net.minecraft.fluid.Fluids
 import net.minecraft.item.*
+import net.minecraft.particle.DefaultParticleType
+import net.minecraft.particle.ParticleTypes
+import net.minecraft.screen.PlayerScreenHandler
 import net.minecraft.screen.ScreenHandlerType
 import net.minecraft.server.command.CommandManager
 import net.minecraft.tag.BlockTags
@@ -36,11 +46,9 @@ import ph.mcmod.cs.fluid.TomatoSauceFluid
 import ph.mcmod.cs.game.*
 import ph.mcmod.cs.item.BowlFoodItem
 import ph.mcmod.cs.item.WaterBowlItem
-import ph.mcmod.kum.AxisArgumentType
-import ph.mcmod.kum.ItemStorable
+import ph.mcmod.kum.*
 import ph.mcmod.kum.arrp.addRecipe_craftingShaped
 import ph.mcmod.kum.arrp.addRecipe_craftingShapeless
-import ph.mcmod.kum.loadClass
 
 object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
     object MyBlocks {
@@ -50,6 +58,9 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
         val TOMATO_SAUCE = FluidBlock(MyFluids.TOMATO_SAUCE, FabricBlockSettings.copyOf(Blocks.WATER))
           .register("tomato_sauce")
           .lang("番茄酱")
+        val SUNFLOWER_OIL = FluidBlock(MyFluids.SUNFLOWER_OIL, FabricBlockSettings.copyOf(Blocks.WATER))
+          .register("sunflower_oil")
+          .lang("葵花籽油")
         //以下都是旧项目的，以后要删掉
         @JvmField
         val VERY_LARGE_BARREL = VeryLargeBarrel.TBlock(FabricBlockSettings.copyOf(Blocks.BARREL)
@@ -127,9 +138,6 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
         val CHOPPED_BROWN_MUSHROOM = Item(ItemSettings().food(MyFoodComponents.CHOPPED_MUSHROOM))
           .register("chopped_brown_mushroom")
           .lang("切好的棕蘑菇")
-        val MUSHROOM_SOUP_BUCKET = BucketItem(MyFluids.MUSHROOM_SOUP_STILL, ItemSettings().maxCount(1))
-          .register("mushroom_soup_bucket")
-          .lang("蘑菇汤桶")
         val MUSHROOM_SOUP = BowlFoodItem(ItemSettings().food(MyFoodComponents.MUSHROOM_SOUP))
           .register("mushroom_soup")
           .lang("碗装蘑菇汤")
@@ -151,12 +159,16 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
         val TOMATO_SAUCE_BUCKET = BucketItem(MyFluids.TOMATO_SAUCE, ItemSettings().maxCount(1))
           .register("tomato_sauce_bucket")
           .lang("番茄酱桶")
-    
-    
-    
+        val MUSHROOM_SOUP_BUCKET = BucketItem(MyFluids.MUSHROOM_SOUP_STILL, ItemSettings().maxCount(1))
+          .register("mushroom_soup_bucket")
+          .lang("蘑菇汤桶")
+        val SUNFLOWER_OIL_BUCKET = BucketItem(MyFluids.SUNFLOWER_OIL, ItemSettings().maxCount(1))
+          .register("sunflower_oil_bucket")
+          .lang("葵花籽油桶")
+        
         //以下都是旧项目的，以后要删掉
         @JvmField
-        val VAULT = VeryLargeBarrel.TItem(MyBlocks.VERY_LARGE_BARREL,FabricItemSettings()).register()
+        val VAULT = VeryLargeBarrel.TItem(MyBlocks.VERY_LARGE_BARREL, FabricItemSettings()).register()
         @JvmField
         val ITEM_REDIRECTOR = DescriptedBlockItem(MyBlocks.ITEM_REDIRECTOR, FabricItemSettings()).register()
         @JvmField
@@ -177,6 +189,11 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
         val MUSHROOM_SOUP_FLOWING = AcidFluid.Flowing().register("mushroom_soup_flowing")
         val TOMATO_SAUCE = TomatoSauceFluid.Still().register("tomato_sauce")
         val TOMATO_SAUCE_FLOWING = TomatoSauceFluid.Flowing().register("tomato_sauce_flowing")
+        val SUNFLOWER_OIL = SunflowerOilFluid.Still()
+          .register("sunflower_oil")
+          .lang("葵花籽油")
+        val SUNFLOWER_OIL_FLOWING = SunflowerOilFluid.Flowing().register("sunflower_oil_flowing")
+        
     }
     
     object MyBlockTags {
@@ -199,6 +216,10 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
         val MUSHROOM_STEW: FoodComponent = FoodComponent.Builder().hunger(1).saturationModifier(0f).statusEffect(StatusEffectInstance(StatusEffects.SATURATION, 1, 20), 1f).build()
         val SMOKED_MUSHROOM: FoodComponent = FoodComponent.Builder().hunger(2).saturationModifier(0.5f).snack().build()
         val BAKED_MUSHROOM: FoodComponent = FoodComponent.Builder().hunger(1).saturationModifier(2f).snack().build()
+    }
+    
+    object MyParticles {
+        val OIL_BUBBLE: DefaultParticleType = FabricParticleTypes.simple().register("oil_bubble")
     }
     
     init {
@@ -243,6 +264,14 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
                             }
                         }))))
             }
+        }
+        BlockSpoutingBehaviour.addCustomSpoutInteraction(id("depot"), SpoutingOil())
+        
+        runAtClient {
+            ClientSpriteRegistryCallback.event(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE).register { atlasTexture, registry ->
+                registry.register(id("particle/oil_bubble"))
+            }
+            ParticleFactoryRegistry.getInstance().register(MyParticles.OIL_BUBBLE, BubblePopParticle::Factory)
         }
     }
 }

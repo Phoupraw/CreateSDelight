@@ -15,10 +15,12 @@ import com.simibubi.create.content.contraptions.relays.belt.transport.Transporte
 import com.simibubi.create.content.contraptions.relays.elementary.BracketedKineticTileEntity
 import com.simibubi.create.content.contraptions.relays.elementary.BracketedKineticTileRenderer
 import com.simibubi.create.foundation.tileEntity.behaviour.belt.TransportedItemStackHandlerBehaviour
+import com.simibubi.create.foundation.tileEntity.behaviour.fluid.SmartFluidTankBehaviour
 import com.simibubi.create.foundation.tileEntity.renderer.SafeTileEntityRenderer
 import com.simibubi.create.foundation.utility.AnimationTickHolder
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant
@@ -376,7 +378,7 @@ internal object MixinDelegates {
         val baseVector = args.get<Vec3d>(0)
         val degree = args.get<Double>(1)
         val cycle0 = 229
-        val ticks = (te as FTemperature).animationTicks + partialTicks  * t1.pow(3)
+        val ticks = (te as FTemperature).animationTicks + partialTicks * t1.pow(3)
         val partial0 = (ticks % cycle0 / cycle0 + hashOffset) * PI * 2
         val sin0 = sin(sin(partial0) * PI * 2)
         val floating = (sin0 * amplitude)
@@ -403,7 +405,7 @@ internal object MixinDelegates {
         val hashCode = stack.item.hashCode()
         val hashOffset = hashCode.toDouble() / Int.MAX_VALUE
         val t1 = mapTemperature(te)
-        val ticks = (te as FTemperature).animationTicks + partialTicks  * t1.pow(3)
+        val ticks = (te as FTemperature).animationTicks + partialTicks * t1.pow(3)
         fun cycle(period: Int) = sin((ticks % period / period + hashOffset) * PI * 2) * 360
 //        infix fun Float.cycle(cycle:Int) = this modAndDiv cycle
         val amplitude = min(min(fluidLevel, 0.15f), 1 - fluidLevel)
@@ -426,4 +428,33 @@ internal object MixinDelegates {
 //        ms.translate(-translation,-translation,-translation)
     }
     
+    @JvmStatic
+    fun renderFluids(renderer: BasinRenderer, te: BasinTileEntity, partialTicks: Float, ms: MatrixStack, buffer: VertexConsumerProvider, light: Int, overlay: Int) {
+//        BasinRenderer
+    }
+    
+    @JvmStatic
+    fun calcFluidLevel(renderer: BasinRenderer, basin: BasinTileEntity, partialTicks: Float, ms: MatrixStack, buffer: VertexConsumerProvider, light: Int, overlay: Int): Float {
+        val inputFluids = basin.getBehaviour(SmartFluidTankBehaviour.INPUT)
+        val outputFluids = basin.getBehaviour(SmartFluidTankBehaviour.OUTPUT)
+        val tanks = arrayOf(inputFluids, outputFluids)
+        val totalUnits: Float = basin.getTotalFluidUnits(partialTicks)
+        if (totalUnits < 1)
+            return 0f
+        
+        var fluidLevel = MathHelper.clamp(totalUnits / (FluidConstants.BUCKET * 2), 0f, 1f)
+        
+        fluidLevel = 1 - (1 - fluidLevel) * (1 - fluidLevel)
+        
+        val xMin = 2 / 16f
+        val xMax = 2 / 16f
+        val yMin = 2 / 16f
+        val yMax = yMin + 12 / 16f * fluidLevel
+        val zMin = 2 / 16f
+        val zMax = 14 / 16f
+        return yMax
+    }
+//    private fun lerpTemperature(te:BasinTileEntity,):Double{
+//        return MathHelper.clamp()
+//    }
 }
