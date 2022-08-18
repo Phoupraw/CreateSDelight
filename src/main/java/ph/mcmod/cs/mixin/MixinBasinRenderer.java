@@ -22,7 +22,7 @@ import ph.mcmod.cs.MixinDelegates;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-@Mixin(BasinRenderer.class)
+@Mixin(value = BasinRenderer.class,remap = false)
 public abstract class MixinBasinRenderer extends SmartTileEntityRenderer<BasinTileEntity> {
     @Shadow
     protected abstract float renderFluids(BasinTileEntity basin, float partialTicks, MatrixStack ms, VertexConsumerProvider buffer, int light, int overlay);

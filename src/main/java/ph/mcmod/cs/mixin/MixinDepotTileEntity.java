@@ -25,6 +25,7 @@ import java.util.List;
 public abstract class MixinDepotTileEntity extends SmartTileEntity implements InjectDepotTileEntity, FluidTransferable {
     private SmartFluidTankBehaviour tank;
     private double temperature;
+
     public MixinDepotTileEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
@@ -45,6 +46,7 @@ public abstract class MixinDepotTileEntity extends SmartTileEntity implements In
         this.temperature = temperature;
     }
 
+
     @Nullable
     @Override
     public Storage<FluidVariant> getFluidStorage(@Nullable Direction face) {
@@ -63,4 +65,6 @@ public abstract class MixinDepotTileEntity extends SmartTileEntity implements In
         behaviours.add(tank);//TODO 这句看上去没用？
 //        InjectDepotTileEntity.addBehaviours((DepotTileEntity) (Object) this, behaviours);
     }
+
+
 }

@@ -29,8 +29,11 @@ class SingleFluidVariantStorage(val capacityPerSlot: Long) : SingleVariantStorag
         return FluidVariant.blank()
     }
 }
-
-
+@ApiStatus.Experimental
+fun <T : Any?> T.printS(): T {
+    print("$this ")
+    return this
+}
 
 
 

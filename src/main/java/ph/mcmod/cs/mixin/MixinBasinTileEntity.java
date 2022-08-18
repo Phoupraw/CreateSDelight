@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import ph.mcmod.cs.MixinDelegates;
 import ph.mcmod.cs.game.FTemperature;
-@Mixin(BasinTileEntity.class)
+@Mixin(value = BasinTileEntity.class,remap = false)
 public abstract class MixinBasinTileEntity extends SmartTileEntity implements FTemperature {
     private double temperature=25;
     private double animationTicks=0;

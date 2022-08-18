@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil
 import net.minecraft.util.math.MathHelper
 import org.jetbrains.annotations.ApiStatus
 import ph.mcmod.kum.always
+import kotlin.math.ceil
 import kotlin.math.pow
 
 interface InjectSpoutTileEntity {
@@ -28,9 +29,9 @@ interface InjectSpoutTileEntity {
             val target = (world.getBlockEntity(te.pos.down(2)) as? FluidTransferable)?.getFluidStorage(null) ?: return
             val source = te.getFluidStorage(null) ?: return
             
-            val radius =1- (2 * MathHelper.clamp(1 - (te.processingTicks - 5.0) / 10, 0.0, 1.0) - 1).pow(2)
+            val radius =1- (2 * MathHelper.clamp(1 - (te.processingTicks /*- 5.0*/) / 10.0, 0.0, 1.0) - 1).pow(2)
 //            print("$radius ")
-            val amount = (radius * FluidConstants.INGOT).toLong()
+            val amount = FluidConstants.INGOT/13//(radius * FluidConstants.INGOT / 6.2).toLong()
             if (amount > 0)
                 StorageUtil.move(source, target, always(), amount, null)
         }

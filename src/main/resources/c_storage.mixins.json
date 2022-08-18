@@ -3,10 +3,11 @@
   "package": "ph.mcmod.cs.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "AccessDepotBehaviour",
     "MixinBasinTileEntity",
     "MixinBracketedKineticTileEntity",
     "MixinDataCommandStorage",
+    "MixinDepotBehaviour",
+    "MixinDepotBlock",
     "MixinDepotTileEntity",
     "MixinFluidBlock",
     "MixinItemDrainItemHandler",

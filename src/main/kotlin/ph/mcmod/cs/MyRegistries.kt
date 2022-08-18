@@ -3,8 +3,12 @@
 package ph.mcmod.cs
 
 import com.nhoryzon.mc.farmersdelight.registry.ItemsRegistry
+import com.simibubi.create.AllBlocks
+import com.simibubi.create.AllMovementBehaviours
+import com.simibubi.create.Create
 import com.simibubi.create.api.behaviour.BlockSpoutingBehaviour
 import com.simibubi.create.content.logistics.block.mechanicalArm.ArmInteractionPointType
+import com.simibubi.create.foundation.sound.SoundScapes
 import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
 import net.fabricmc.fabric.api.`object`.builder.v1.block.entity.FabricBlockEntityTypeBuilder
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry
@@ -24,6 +28,7 @@ import net.minecraft.block.FluidBlock
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.client.particle.BubblePopParticle
 import net.minecraft.client.particle.FlameParticle
+import net.minecraft.client.particle.WaterBubbleParticle
 import net.minecraft.client.texture.SpriteAtlasTexture
 import net.minecraft.command.argument.BlockPosArgumentType
 import net.minecraft.entity.effect.StatusEffectInstance
@@ -39,6 +44,7 @@ import net.minecraft.tag.BlockTags
 import net.minecraft.tag.ItemTags
 import net.minecraft.text.LiteralText
 import net.minecraft.util.math.Direction
+import net.minecraft.util.registry.Registry
 import ph.mcmod.cs.MyRegistries.MyItems.MUSHROOM_SOUP
 import ph.mcmod.cs.MyRegistries.MyItems.WATER_BOWL
 import ph.mcmod.cs.fluid.AcidFluid
@@ -267,11 +273,15 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
         }
         BlockSpoutingBehaviour.addCustomSpoutInteraction(id("depot"), SpoutingOil())
         
+        Create.registrate()
+          .addRegisterCallback(Registry.BLOCK.key) {
+              AllMovementBehaviours.registerBehaviour(AllBlocks.DEPOT.get(), DepotMovementBehaviour)
+          }
         runAtClient {
             ClientSpriteRegistryCallback.event(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE).register { atlasTexture, registry ->
                 registry.register(id("particle/oil_bubble"))
             }
-            ParticleFactoryRegistry.getInstance().register(MyParticles.OIL_BUBBLE, BubblePopParticle::Factory)
+            ParticleFactoryRegistry.getInstance().register(MyParticles.OIL_BUBBLE, WaterBubbleParticle::Factory)
         }
     }
 }
