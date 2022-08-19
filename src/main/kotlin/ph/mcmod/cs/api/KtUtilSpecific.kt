@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleVariantStorage
 import net.minecraft.inventory.SimpleInventory
 import org.jetbrains.annotations.ApiStatus
 import ph.mcmod.kum.asStorage
+import ph.mcmod.kum.forEach
 
 @ApiStatus.Experimental
 infix fun Double.modAndDiv(divisor: Number): Double = this % divisor.toDouble() / divisor.toDouble()
@@ -35,8 +36,11 @@ fun <T : Any?> T.printS(): T {
     return this
 }
 
-
-
+//inline fun <T> MutableIterable<T>.forEach(consumer: (element: T, remove: () -> Unit, break_: () -> Unit) -> Unit) {
+//    val iterator = this.iterator()
+//    while (iterator.hasNext())
+//        consumer(iterator.next(), iterator::remove) { break }
+//}
 
 
 

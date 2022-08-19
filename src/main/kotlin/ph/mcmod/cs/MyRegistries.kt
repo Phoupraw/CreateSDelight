@@ -5,6 +5,7 @@ package ph.mcmod.cs
 import com.nhoryzon.mc.farmersdelight.registry.ItemsRegistry
 import com.simibubi.create.AllBlocks
 import com.simibubi.create.AllMovementBehaviours
+import com.simibubi.create.AllTags
 import com.simibubi.create.Create
 import com.simibubi.create.api.behaviour.BlockSpoutingBehaviour
 import com.simibubi.create.content.logistics.block.mechanicalArm.ArmInteractionPointType
@@ -14,6 +15,7 @@ import net.fabricmc.fabric.api.`object`.builder.v1.block.entity.FabricBlockEntit
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback
 import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes
 import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags
@@ -37,8 +39,10 @@ import net.minecraft.fluid.Fluids
 import net.minecraft.item.*
 import net.minecraft.particle.DefaultParticleType
 import net.minecraft.particle.ParticleTypes
+import net.minecraft.resource.LifecycledResourceManager
 import net.minecraft.screen.PlayerScreenHandler
 import net.minecraft.screen.ScreenHandlerType
+import net.minecraft.server.MinecraftServer
 import net.minecraft.server.command.CommandManager
 import net.minecraft.tag.BlockTags
 import net.minecraft.tag.ItemTags
@@ -57,6 +61,8 @@ import ph.mcmod.kum.arrp.addRecipe_craftingShaped
 import ph.mcmod.kum.arrp.addRecipe_craftingShapeless
 
 object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
+   
+    
     object MyBlocks {
         val MUSHROOM_SOUP = FluidBlock(MyFluids.MUSHROOM_SOUP_STILL, FabricBlockSettings.copyOf(Blocks.WATER))
           .register("mushroom_soup")
@@ -277,12 +283,26 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
           .addRegisterCallback(Registry.BLOCK.key) {
               AllMovementBehaviours.registerBehaviour(AllBlocks.DEPOT.get(), DepotMovementBehaviour)
           }
+          .addRegisterCallback(Registry.ITEM.key) {
+          
+          }
+        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register{ server, resourceManager, success ->
+        
+        }
+        arrpHelper.getTag(AllTags.AllItemTags.UPRIGHT_ON_BELT.tag)
+          .add(Items.BOWL)
+        
         runAtClient {
             ClientSpriteRegistryCallback.event(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE).register { atlasTexture, registry ->
                 registry.register(id("particle/oil_bubble"))
             }
             ParticleFactoryRegistry.getInstance().register(MyParticles.OIL_BUBBLE, WaterBubbleParticle::Factory)
         }
+    }
+    @JvmStatic
+    fun afterFDInit() {
+        arrpHelper.getTag(AllTags.AllItemTags.UPRIGHT_ON_BELT.tag)
+          .add(ItemsRegistry.FRUIT_SALAD.get())
     }
 }
 
