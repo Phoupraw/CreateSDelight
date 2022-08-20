@@ -1,5 +1,6 @@
 package ph.mcmod.cs.game
 
+import com.nhoryzon.mc.farmersdelight.registry.ItemsRegistry
 import com.simibubi.create.AllBlocks
 import com.simibubi.create.content.contraptions.fluids.actors.ItemDrainTileEntity
 import com.simibubi.create.content.contraptions.processing.EmptyingByBasin
@@ -164,6 +165,17 @@ interface InjectItemDrainTileEntity {
                 return true
             })
             return false
+        }
+        
+        @JvmStatic
+        fun modifyAngle(te: ItemDrainTileEntity, heldItem: TransportedItemStack, insertedFrom: Direction) {
+            if (heldItem.stack.isOf(ItemsRegistry.BARBECUE_STICK.get())) {
+//                te.world.printS()
+//                heldItem.angle.printS()
+                heldItem.angle = (insertedFrom.horizontal) * 90 - 45
+//                heldItem.angle.printS()
+//                te.notifyUpdate()
+            }
         }
     }
 }

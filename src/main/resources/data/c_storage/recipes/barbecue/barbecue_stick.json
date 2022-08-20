@@ -1,0 +1,9 @@
+{
+  "type": "c_storage:barbecue",
+  "ingredient": {
+    "item": "farmersdelight:barbecue_stick"
+  },
+  "result": {
+    "id": "farmersdelight:barbecue_stick"
+  }
+}

@@ -2,11 +2,13 @@ package ph.mcmod.cs.mixin;
 
 import com.simibubi.create.content.contraptions.fluids.actors.ItemDrainRenderer;
 import com.simibubi.create.content.contraptions.fluids.actors.ItemDrainTileEntity;
+import com.simibubi.create.content.contraptions.relays.belt.transport.TransportedItemStack;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import ph.mcmod.cs.game.InjectItemDrainRenderer;
 @Mixin(ItemDrainRenderer.class)
 public class MixinItemDrainRenderer {
@@ -24,12 +26,13 @@ public class MixinItemDrainRenderer {
         return InjectItemDrainRenderer.modifyOffset(te, partialTicks, value);
     }
 
-    @ModifyVariable(method = "renderItem",  name = "offset", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Direction$AxisDirection;offset()I"))
+    @ModifyVariable(method = "renderItem", name = "offset", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Direction$AxisDirection;offset()I"))
     private float modifyAngle(float value) {
         return InjectItemDrainRenderer.modifyAngle(te, partialTicks, value);
     }
-//    @ModifyVariable(method = "renderItem", print = true, name = "offset", slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Direction$AxisDirection;offset()I")), at = @At(value = "LOAD", opcode = Opcodes.FLOAD, ordinal = 0,shift = At.Shift.BEFORE))
-//    private double modifyAngle(double value) {
-//        return InjectItemDrainRenderer.modifyOffset(te, partialTicks, value);
-//    }
+
+    @Inject(method = "renderItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/item/ItemRenderer;renderItem(Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/render/model/json/ModelTransformation$Mode;IILnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V"), locals = LocalCapture.CAPTURE_FAILHARD)
+    private void rotateToAngle(ItemDrainTileEntity te, float partialTicks, MatrixStack ms, VertexConsumerProvider buffer, int light, int overlay, CallbackInfo ci, TransportedItemStack heldItem) {
+        InjectItemDrainRenderer.rotateToAngle(te, partialTicks, ms, buffer, light, overlay, heldItem);
+    }
 }

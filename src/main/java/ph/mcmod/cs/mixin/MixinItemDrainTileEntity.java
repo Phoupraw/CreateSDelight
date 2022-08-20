@@ -5,6 +5,7 @@ import com.simibubi.create.content.contraptions.relays.belt.transport.Transporte
 import kotlin.jvm.internal.Ref;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -46,11 +47,6 @@ public abstract class MixinItemDrainTileEntity implements InjectItemDrainTileEnt
         return InjectItemDrainTileEntity.enableProcessing((ItemDrainTileEntity) (Object) this, world, stack, heldItem);
     }
 
-//    @Redirect(method = "tryInsertingFromSide", at = @At(value = "INVOKE", target = "Lcom/simibubi/create/content/contraptions/processing/EmptyingByBasin;canItemBeEmptied(Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;)Z"))
-//    private boolean check(World world, ItemStack stack) {
-//        return MixinDelegates.check((ItemDrainTileEntity) (Object) this, world, stack);
-//    }
-
     @Inject(method = "continueProcessing", at = @At(value = "INVOKE", target = "Lcom/simibubi/create/content/contraptions/processing/EmptyingByBasin;canItemBeEmptied(Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;)Z"), cancellable = true)
     private void process(CallbackInfoReturnable<Boolean> cir) {
         /* Integer processingTicks = */
@@ -60,7 +56,10 @@ public abstract class MixinItemDrainTileEntity implements InjectItemDrainTileEnt
         InjectItemDrainTileEntity.process((ItemDrainTileEntity) (Object) this, heldItem, cir, processingTicks);
         this.processingTicks = processingTicks.element;
     }
-
+    @Inject(method = "setHeldItem", at = @At("RETURN"))
+    private void modifyAngle(TransportedItemStack heldItem, Direction insertedFrom, CallbackInfo ci) {
+        InjectItemDrainTileEntity.modifyAngle((ItemDrainTileEntity) (Object) this, heldItem,insertedFrom);
+    }
     @Inject(method = "read", at = @At("HEAD"))
     private void read(NbtCompound compound, boolean clientPacket, CallbackInfo ci) {
         setToastingStage(compound.getInt("toastingStage"));

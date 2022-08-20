@@ -1,6 +1,12 @@
 package ph.mcmod.cs.game
 
+import com.jozufozu.flywheel.util.transform.TransformStack
+import com.nhoryzon.mc.farmersdelight.registry.ItemsRegistry
 import com.simibubi.create.content.contraptions.fluids.actors.ItemDrainTileEntity
+import com.simibubi.create.content.contraptions.relays.belt.transport.TransportedItemStack
+import net.minecraft.client.render.VertexConsumerProvider
+import net.minecraft.client.util.math.MatrixStack
+
 //TODO 烧烤翻面
 interface InjectItemDrainRenderer {
     companion object {
@@ -34,6 +40,13 @@ interface InjectItemDrainRenderer {
 //                return offset
 //            }
             return offset
+        }
+        
+        @JvmStatic
+        fun rotateToAngle(te: ItemDrainTileEntity, partialTicks: Float, ms: MatrixStack, buffer: VertexConsumerProvider, light: Int, overlay: Int, heldItem: TransportedItemStack) {
+            if (!heldItem.stack.isOf(ItemsRegistry.BARBECUE_STICK.get())) return
+            TransformStack.cast(ms)
+              .rotateZ(heldItem.angle.toDouble()+90)
         }
     }
 }

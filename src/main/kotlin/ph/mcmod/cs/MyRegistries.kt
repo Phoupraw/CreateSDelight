@@ -15,6 +15,8 @@ import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry
 import me.shedaniel.rei.api.common.util.EntryStacks
+import me.shedaniel.rei.plugin.client.categories.DefaultCampfireCategory
+import me.shedaniel.rei.plugin.common.BuiltinPlugin
 import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
 import net.fabricmc.fabric.api.`object`.builder.v1.block.entity.FabricBlockEntityTypeBuilder
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry
@@ -268,6 +270,7 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
         override fun registerCategories(registry: CategoryRegistry) {
             registry.add(BarbecueCatagory)
             registry.addWorkstations(BARBECUE, EntryStacks.of(AllBlocks.ITEM_DRAIN.get()), EntryStacks.of(Fluids.LAVA))
+            registry.addWorkstations(BuiltinPlugin.CAMPFIRE, EntryStacks.of(AllBlocks.ITEM_DRAIN.get()), EntryStacks.of(Fluids.LAVA))
         }
         
         override fun registerScreens(registry: ScreenRegistry) {
