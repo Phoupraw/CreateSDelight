@@ -169,12 +169,8 @@ interface InjectItemDrainTileEntity {
         
         @JvmStatic
         fun modifyAngle(te: ItemDrainTileEntity, heldItem: TransportedItemStack, insertedFrom: Direction) {
-            if (heldItem.stack.isOf(ItemsRegistry.BARBECUE_STICK.get())) {
-//                te.world.printS()
-//                heldItem.angle.printS()
+            if (heldItem.stack.isIn(MyRegistries.MyItemTags.ANGLE_ON_DRAIN)) {
                 heldItem.angle = (insertedFrom.horizontal) * 90 - 45
-//                heldItem.angle.printS()
-//                te.notifyUpdate()
             }
         }
     }

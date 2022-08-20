@@ -2,6 +2,7 @@
 
 package ph.mcmod.cs
 
+import com.nhoryzon.mc.farmersdelight.item.Foods
 import com.nhoryzon.mc.farmersdelight.registry.ItemsRegistry
 import com.simibubi.create.*
 import com.simibubi.create.api.behaviour.BlockSpoutingBehaviour
@@ -15,8 +16,8 @@ import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry
 import me.shedaniel.rei.api.common.util.EntryStacks
-import me.shedaniel.rei.plugin.client.categories.DefaultCampfireCategory
 import me.shedaniel.rei.plugin.common.BuiltinPlugin
+import net.devtech.arrp.api.RuntimeResourcePack
 import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
 import net.fabricmc.fabric.api.`object`.builder.v1.block.entity.FabricBlockEntityTypeBuilder
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry
@@ -31,6 +32,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.FullItemFluidStorage
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant
 import net.fabricmc.fabric.impl.tag.convention.TagRegistration
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.block.Blocks
@@ -46,6 +48,7 @@ import net.minecraft.item.FoodComponent
 import net.minecraft.item.Item
 import net.minecraft.item.Items
 import net.minecraft.particle.DefaultParticleType
+import net.minecraft.recipe.Ingredient
 import net.minecraft.screen.PlayerScreenHandler
 import net.minecraft.screen.ScreenHandlerType
 import net.minecraft.server.command.CommandManager
@@ -54,11 +57,14 @@ import net.minecraft.tag.ItemTags
 import net.minecraft.tag.TagKey
 import net.minecraft.text.LiteralText
 import net.minecraft.text.TranslatableText
+import net.minecraft.util.Identifier
 import net.minecraft.util.math.Direction
 import net.minecraft.util.registry.Registry
 import org.jetbrains.annotations.ApiStatus
 import ph.mcmod.cs.MyRegistries.MyItems.MUSHROOM_SOUP
 import ph.mcmod.cs.MyRegistries.MyItems.WATER_BOWL
+import ph.mcmod.cs.api.printL
+import ph.mcmod.cs.api.printS
 import ph.mcmod.cs.fluid.AcidFluid
 import ph.mcmod.cs.fluid.TomatoSauceFluid
 import ph.mcmod.cs.game.*
@@ -66,12 +72,9 @@ import ph.mcmod.cs.item.BowlFoodItem
 import ph.mcmod.cs.item.WaterBowlItem
 import ph.mcmod.cs.rei.BarbecueCatagory
 import ph.mcmod.cs.rei.BarbecueDisplay
-import ph.mcmod.kum.AxisArgumentType
-import ph.mcmod.kum.ItemStorable
+import ph.mcmod.kum.*
 import ph.mcmod.kum.arrp.addRecipe_craftingShaped
 import ph.mcmod.kum.arrp.addRecipe_craftingShapeless
-import ph.mcmod.kum.loadClass
-import ph.mcmod.kum.runAtClient
 
 object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
     
@@ -147,6 +150,13 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
     }
     
     object MyItems {
+        val RAW_CHICKEN_STICK = Item(ItemSettings().food(Foods.CHICKEN_CUTS.get()))
+          .register("raw_chicken_stick")
+          .lang("生鸡肉串")
+        val CHICKEN_STICK = Item(ItemSettings().food(MyFoodComponents.CHICKEN_STICK))
+          .register("chicken_stick")
+          .lang("熟鸡肉串")
+        
         val WATER_BOWL = WaterBowlItem(ItemSettings())
           .register("water_bowl")
           .lang("碗装水")
@@ -224,7 +234,8 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
     }
     
     object MyItemTags {
-        val DOUGH: TagKey<Item> = TagRegistration.ITEM_TAG_REGISTRATION.registerCommon("doughs")
+        val DOUGHS: TagKey<Item> = TagRegistration.ITEM_TAG_REGISTRATION.registerCommon("doughs")
+        val ANGLE_ON_DRAIN = newItemTag("angle_on_drain")
     }
     
     object MyScreenHandlerTypes {
@@ -235,6 +246,12 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
     }
     
     object MyFoodComponents {
+        val CHICKEN_STICK: FoodComponent = FoodComponent.Builder()
+          .hunger(1)
+          .saturationModifier(0.5f)
+          .statusEffect(StatusEffectInstance(StatusEffects.SATURATION, 1, 6), 1f)
+          .build()
+        
         val CHOPPING_MUSHROOM: FoodComponent = FoodComponent.Builder().hunger(1).saturationModifier(0.5f).build()
         val CHOPPED_MUSHROOM: FoodComponent = FoodComponent.Builder().hunger(1).saturationModifier(0.5f).snack().build()
         val MUSHROOM_SOUP: FoodComponent = FoodComponent.Builder().hunger(6).saturationModifier(0.5f).build()
@@ -347,12 +364,22 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
           
           }
         ServerLifecycleEvents.END_DATA_PACK_RELOAD.register { server, resourceManager, success ->
-//            server.recipeManager.setRecipes()
+//            server.recipeManager.setRecipes(server.recipeManager.values().apply {
+//                addAll(arrayOf(
+//                  BarbecueRecipe(MyItems.CHICKEN_STICK.id.pre("barbecue/"), Ingredient.ofItems(MyItems.RAW_CHICKEN_STICK), ItemVariant.of(MyItems.CHICKEN_STICK), 100.0)
+//                ))
+//            })
         }
         arrpHelper.getTag(AllTags.AllItemTags.UPRIGHT_ON_BELT.tag)
           .add(Items.BOWL)
-        arrpHelper.getTag(MyItemTags.DOUGH)
+        arrpHelper.getTag(MyItemTags.DOUGHS)
           .add(AllItems.DOUGH.id)
+        arrpHelper.getTag(MyItemTags.ANGLE_ON_DRAIN)
+          .add(Items.STICK)
+          .add(Items.BLAZE_ROD)
+          .add(MyItems.RAW_CHICKEN_STICK)
+          .add(MyItems.CHICKEN_STICK)
+        arrpHelper.packAfter.addRecipe_barbecue(MyItems.RAW_CHICKEN_STICK, MyItems.CHICKEN_STICK)
         runAtClient {
             ClientSpriteRegistryCallback.event(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE).register { atlasTexture, registry ->
                 registry.register(id("particle/oil_bubble"))
@@ -365,8 +392,28 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
     fun afterFDInit() {
         arrpHelper.getTag(AllTags.AllItemTags.UPRIGHT_ON_BELT.tag)
           .add(ItemsRegistry.FRUIT_SALAD.get())
-        arrpHelper.getTag(MyItemTags.DOUGH)
+        arrpHelper.getTag(MyItemTags.DOUGHS)
           .add(ItemsRegistry.WHEAT_DOUGH.get())
+        arrpHelper.getTag(MyItemTags.ANGLE_ON_DRAIN)
+          .add(ItemsRegistry.BARBECUE_STICK.get())
+        arrpHelper.packAfter.addRecipe_craftingShapeless(MyItems.CHICKEN_STICK, 1, Items.STICK, ItemsRegistry.CHICKEN_CUTS.get())
     }
+    
+    fun RuntimeResourcePack.addRecipe_barbecue(ingredient: Identifiable, result: Identifiable) = addRecipe_barbecue(ingredient, result, recipeId = id(ingredient.id.path).pre("barbecue/"))
 }
 
+fun RuntimeResourcePack.addRecipe_barbecue(ingredient: Identifiable, result: Identifiable, duration: Double = SingleRecipe.DEFUALT_DURATION, recipeId: Identifier = result.id.pre("barbecue/")): ByteArray {
+    val isTag = ingredient is TagKey<*>
+    return addData(recipeId.preRecipes().json(), """
+        {
+          "type": "c_storage:barbecue",
+          "ingredient": {
+            "${if (isTag) "tag" else "item"}": "${ingredient.id}"
+          },
+          "result": {
+            "id": "${result.id}"
+          },
+          "duration": $duration
+        }
+    """.trimIndent().printL().toByteArray())
+}

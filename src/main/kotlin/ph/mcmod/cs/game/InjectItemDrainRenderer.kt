@@ -6,6 +6,7 @@ import com.simibubi.create.content.contraptions.fluids.actors.ItemDrainTileEntit
 import com.simibubi.create.content.contraptions.relays.belt.transport.TransportedItemStack
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.util.math.MatrixStack
+import ph.mcmod.cs.MyRegistries
 
 //TODO 烧烤翻面
 interface InjectItemDrainRenderer {
@@ -44,9 +45,9 @@ interface InjectItemDrainRenderer {
         
         @JvmStatic
         fun rotateToAngle(te: ItemDrainTileEntity, partialTicks: Float, ms: MatrixStack, buffer: VertexConsumerProvider, light: Int, overlay: Int, heldItem: TransportedItemStack) {
-            if (!heldItem.stack.isOf(ItemsRegistry.BARBECUE_STICK.get())) return
+            if (!heldItem.stack.isIn(MyRegistries.MyItemTags.ANGLE_ON_DRAIN)) return
             TransformStack.cast(ms)
-              .rotateZ(heldItem.angle.toDouble()+90)
+              .rotateZ(heldItem.angle.toDouble() + 90)
         }
     }
 }

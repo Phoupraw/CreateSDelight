@@ -43,6 +43,11 @@ fun <T : Any?> T.printS(): T {
     return this
 }
 @ApiStatus.Experimental
+fun <T : Any?> T.printL(): T {
+    runAtDev { println(this) }
+    return this
+}
+@ApiStatus.Experimental
 inline fun <T> NbtCompound.getOrNull(key: String, getter: NbtCompound.(String) -> T): T? = if (!contains(key)) null else getter(key)
 @ApiStatus.Experimental
 inline fun <T> NbtCompound.putOrRemove(key: String, value: T?, setter: NbtCompound.(String, T) -> Unit) {
