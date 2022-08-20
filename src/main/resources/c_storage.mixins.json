@@ -16,9 +16,16 @@
     "MixinItemDrainTileEntity",
     "MixinItems",
     "MixinMinecraftServer",
+    "MixinServerWorld",
     "MixinSpoutTileEntity"
   ],
-  "client": ["MixinBasinRenderer", "MixinBracketedKineticTileRenderer", "MixinDepotRenderer", "MixinSafeTileEntityRenderer"],
+  "client": [
+    "MixinBasinRenderer",
+    "MixinBracketedKineticTileRenderer",
+    "MixinDepotRenderer",
+    "MixinSafeTileEntityRenderer",
+    "MixinItemDrainRenderer"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

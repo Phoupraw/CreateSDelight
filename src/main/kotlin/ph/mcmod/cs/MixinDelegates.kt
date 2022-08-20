@@ -3,6 +3,7 @@
 package ph.mcmod.cs
 
 import com.jozufozu.flywheel.util.transform.TransformStack
+import com.simibubi.create.AllBlocks
 import com.simibubi.create.AllTags
 import com.simibubi.create.content.contraptions.base.KineticTileEntity
 import com.simibubi.create.content.contraptions.base.KineticTileEntityRenderer
@@ -135,7 +136,7 @@ internal object MixinDelegates {
     
     fun shouldSteam(te: ItemDrainTileEntity): Boolean {
         return getFluidStorageView(te).run {
-            resource.fluid.isIn(FluidTags.WATER) && te.world?.getBlockState(te.pos.down())?.isOf(Blocks.LAVA) == true
+            resource.fluid.isIn(FluidTags.WATER) && te.world?.getBlockState(te.pos.down())?.isOf(AllBlocks.LIT_BLAZE_BURNER.get()) == true
         }
     }
     
@@ -146,7 +147,7 @@ internal object MixinDelegates {
                 if (world is ServerWorld) {
                     val tempInv = SimpleInventory(1)
                     tempInv.setStack(0, itemVariant.toStack())
-                    val optional = world.server.recipeManager.getFirstMatch(RecipeType.CAMPFIRE_COOKING, tempInv, world)
+                    val optional = world.server.recipeManager.getFirstMatch(MyRegistries.MyRecipeTypes.STEAMING, tempInv, world)
                     if (optional.isPresent) {
                         return optional.get()
                     }
@@ -189,21 +190,21 @@ internal object MixinDelegates {
         if (EmptyingByBasin.canItemBeEmptied(world, stack)) {
             return true
         }
-        getCampfireCookingRecipe(te, null, ItemVariant.of(stack))?.also { recipe ->
-            heldItem.stack = recipe.output
-            return false
-        }
-        getSteamRecipe(te, ItemVariant.of(stack))?.also { recipe ->
-            stack.orCreateNbt.putInt("restTime", 100)
-            return true
-        }
+//        getCampfireCookingRecipe(te, null, ItemVariant.of(stack))?.also { recipe ->
+//            heldItem.stack = recipe.output
+//            return false
+//        }
+//        getSteamRecipe(te, ItemVariant.of(stack))?.also { recipe ->
+//            stack.orCreateNbt.putInt("restTime", 100)
+//            return true
+//        }
         
         return false
     }
     
     @JvmStatic
     fun check(te: ItemDrainTileEntity, world: World, stack: ItemStack): Boolean {
-        return EmptyingByBasin.canItemBeEmptied(world, stack) || getCampfireCookingRecipe(te, null, ItemVariant.of(stack)) != null
+        return EmptyingByBasin.canItemBeEmptied(world, stack) //|| getCampfireCookingRecipe(te, null, ItemVariant.of(stack)) != null
     }
     @JvmStatic
     fun steam(te: ItemDrainTileEntity, heldItem: TransportedItemStack, cir: CallbackInfoReturnable<Boolean>): Int? {

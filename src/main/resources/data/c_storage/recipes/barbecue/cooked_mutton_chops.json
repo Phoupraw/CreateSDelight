@@ -1,0 +1,9 @@
+{
+  "type": "c_storage:barbecue",
+  "ingredient": {
+    "item": "farmersdelight:mutton_chops"
+  },
+  "result": {
+    "id": "farmersdelight:cooked_mutton_chops"
+  }
+}

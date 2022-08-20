@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.block.Block
+import net.minecraft.block.FluidBlock
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.entity.Entity
@@ -14,6 +15,9 @@ import net.minecraft.fluid.Fluid
 import net.minecraft.item.*
 import net.minecraft.particle.ParticleEffect
 import net.minecraft.particle.ParticleType
+import net.minecraft.recipe.Recipe
+import net.minecraft.recipe.RecipeSerializer
+import net.minecraft.recipe.RecipeType
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerType
 import net.minecraft.tag.TagKey
@@ -50,7 +54,7 @@ open class RegistryHelper(val namespace: String, itemGroupIcon: (() -> ItemStack
                     arrpHelper.packBefore.addModel_block_cubeAll(block.id)
                     modeleds += block
                 }
-                if (block !in lootTableds) {
+                if (block !in lootTableds && block !is FluidBlock) {
                     arrpHelper.packBefore.addLootTable_itself(block)
                     lootTableds += block
                 }
@@ -136,4 +140,12 @@ open class RegistryHelper(val namespace: String, itemGroupIcon: (() -> ItemStack
     
     fun id(path: String): Identifier = Identifier(namespace, path)
     fun ItemSettings(itemGroup: ItemGroup = this.itemGroup): FabricItemSettings = FabricItemSettings().group(itemGroup)
+    
+    fun <T : Recipe<*>> registerRecipeType(path: String, serializer: RecipeSerializer<T>): RecipeType<T> {
+        val id = id(path)
+        Registry.register(Registry.RECIPE_SERIALIZER, id, serializer)
+        return RecipeType.register(id.toString())
+    }
+    
+    fun newItemTag(path: String): TagKey<Item> = TagKey.of(Registry.ITEM_KEY, id(path))
 }

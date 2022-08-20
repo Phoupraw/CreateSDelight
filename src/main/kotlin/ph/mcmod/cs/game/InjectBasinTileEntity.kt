@@ -25,7 +25,7 @@ import ph.mcmod.kum.id
 import kotlin.math.pow
 
 interface InjectBasinTileEntity {
-    @ApiStatus.Internal
+   
     companion object {
         @JvmStatic
         fun modifyOutput(te: BasinTileEntity, targetInv: Storage<ItemVariant>, itemVariant: ItemVariant, amount: Long, nested: TransactionContext): Long {

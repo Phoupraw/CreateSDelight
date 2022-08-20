@@ -20,7 +20,7 @@ interface InjectSpoutTileEntity {
         @JvmStatic
         fun isOil(te: SpoutTileEntity): Boolean {
             if (te.pos == BlockPos(14, 3, 34) && te.customProcess != null) {
-                te.world.printS()
+                te.world//.printS()
 //                te.customProcess.printS()
             }
             return (te.customProcess is SpoutingOil)//.printS()

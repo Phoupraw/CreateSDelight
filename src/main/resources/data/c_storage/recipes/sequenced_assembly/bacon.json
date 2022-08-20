@@ -9,7 +9,7 @@
       "results": [{"item": "porkchop"}]
     },
     {
-      "type": "create:crushing",
+      "type": "create:cutting",
       "ingredients": [{"item": "porkchop"}],
       "results": [{"item": "porkchop"}]
     }

@@ -5,7 +5,7 @@
 	"sequence": [
 		{
 			"type": "create:deploying",
-			"ingbrownients": [
+			"ingredients": [
 				{"item": "farmersdelight:brown_mushroom_colony"},
 				{"tag": "farmersdelight:tools/knives"}
 			],

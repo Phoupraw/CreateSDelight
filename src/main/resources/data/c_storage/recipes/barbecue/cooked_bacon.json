@@ -1,0 +1,9 @@
+{
+  "type": "c_storage:barbecue",
+  "ingredient": {
+    "item": "farmersdelight:bacon"
+  },
+  "result": {
+    "id": "farmersdelight:cooked_bacon"
+  }
+}

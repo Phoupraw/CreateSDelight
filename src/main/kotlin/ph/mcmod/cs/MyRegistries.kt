@@ -3,13 +3,18 @@
 package ph.mcmod.cs
 
 import com.nhoryzon.mc.farmersdelight.registry.ItemsRegistry
-import com.simibubi.create.AllBlocks
-import com.simibubi.create.AllMovementBehaviours
-import com.simibubi.create.AllTags
-import com.simibubi.create.Create
+import com.simibubi.create.*
 import com.simibubi.create.api.behaviour.BlockSpoutingBehaviour
 import com.simibubi.create.content.logistics.block.mechanicalArm.ArmInteractionPointType
-import com.simibubi.create.foundation.sound.SoundScapes
+import me.shedaniel.rei.api.client.plugins.REIClientPlugin
+import me.shedaniel.rei.api.client.registry.category.CategoryRegistry
+import me.shedaniel.rei.api.client.registry.display.DisplayRegistry
+import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry
+import me.shedaniel.rei.api.common.category.CategoryIdentifier
+import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry
+import me.shedaniel.rei.api.common.plugins.REIServerPlugin
+import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry
+import me.shedaniel.rei.api.common.util.EntryStacks
 import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
 import net.fabricmc.fabric.api.`object`.builder.v1.block.entity.FabricBlockEntityTypeBuilder
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry
@@ -24,31 +29,32 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.FullItemFluidStorage
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage
+import net.fabricmc.fabric.impl.tag.convention.TagRegistration
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.block.Blocks
 import net.minecraft.block.FluidBlock
 import net.minecraft.block.entity.BlockEntityType
-import net.minecraft.client.particle.BubblePopParticle
-import net.minecraft.client.particle.FlameParticle
 import net.minecraft.client.particle.WaterBubbleParticle
-import net.minecraft.client.texture.SpriteAtlasTexture
 import net.minecraft.command.argument.BlockPosArgumentType
 import net.minecraft.entity.effect.StatusEffectInstance
 import net.minecraft.entity.effect.StatusEffects
 import net.minecraft.fluid.Fluids
-import net.minecraft.item.*
+import net.minecraft.item.BucketItem
+import net.minecraft.item.FoodComponent
+import net.minecraft.item.Item
+import net.minecraft.item.Items
 import net.minecraft.particle.DefaultParticleType
-import net.minecraft.particle.ParticleTypes
-import net.minecraft.resource.LifecycledResourceManager
 import net.minecraft.screen.PlayerScreenHandler
 import net.minecraft.screen.ScreenHandlerType
-import net.minecraft.server.MinecraftServer
 import net.minecraft.server.command.CommandManager
 import net.minecraft.tag.BlockTags
 import net.minecraft.tag.ItemTags
+import net.minecraft.tag.TagKey
 import net.minecraft.text.LiteralText
+import net.minecraft.text.TranslatableText
 import net.minecraft.util.math.Direction
 import net.minecraft.util.registry.Registry
+import org.jetbrains.annotations.ApiStatus
 import ph.mcmod.cs.MyRegistries.MyItems.MUSHROOM_SOUP
 import ph.mcmod.cs.MyRegistries.MyItems.WATER_BOWL
 import ph.mcmod.cs.fluid.AcidFluid
@@ -56,12 +62,16 @@ import ph.mcmod.cs.fluid.TomatoSauceFluid
 import ph.mcmod.cs.game.*
 import ph.mcmod.cs.item.BowlFoodItem
 import ph.mcmod.cs.item.WaterBowlItem
-import ph.mcmod.kum.*
+import ph.mcmod.cs.rei.BarbecueCatagory
+import ph.mcmod.cs.rei.BarbecueDisplay
+import ph.mcmod.kum.AxisArgumentType
+import ph.mcmod.kum.ItemStorable
 import ph.mcmod.kum.arrp.addRecipe_craftingShaped
 import ph.mcmod.kum.arrp.addRecipe_craftingShapeless
+import ph.mcmod.kum.loadClass
+import ph.mcmod.kum.runAtClient
 
 object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
-   
     
     object MyBlocks {
         val MUSHROOM_SOUP = FluidBlock(MyFluids.MUSHROOM_SOUP_STILL, FabricBlockSettings.copyOf(Blocks.WATER))
@@ -212,6 +222,7 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
     }
     
     object MyItemTags {
+        val DOUGH: TagKey<Item> = TagRegistration.ITEM_TAG_REGISTRATION.registerCommon("doughs")
     }
     
     object MyScreenHandlerTypes {
@@ -234,11 +245,57 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
         val OIL_BUBBLE: DefaultParticleType = FabricParticleTypes.simple().register("oil_bubble")
     }
     
+    object MyRecipeTypes {
+        val STEAMING = registerRecipeType("steaming", SteamingRecipe.Serializer)
+        val BARBECUE = registerRecipeType("barbecue", BarbecueRecipe.Serializer)
+    }
+    
+    object REIClient : REIClientPlugin {
+        val BARBECUE: CategoryIdentifier<BarbecueDisplay> = CategoryIdentifier.of(MyRecipeTypes.BARBECUE.toString())
+        val BARBECUE_TITLE = TranslatableText("category.$namespace.${BARBECUE.path}")
+        
+        init {
+            arrpHelper.getLang()
+              .entry(BARBECUE_TITLE.key, "烧烤")
+            arrpHelper.getLang("en_us")
+              .entry(BARBECUE_TITLE.key, "Barbecue")
+        }
+        
+        override fun getPluginProviderName(): String {
+            return id("rei_client").toString()
+        }
+        
+        override fun registerCategories(registry: CategoryRegistry) {
+            registry.add(BarbecueCatagory)
+            registry.addWorkstations(BARBECUE, EntryStacks.of(AllBlocks.ITEM_DRAIN.get()), EntryStacks.of(Fluids.LAVA))
+        }
+        
+        override fun registerScreens(registry: ScreenRegistry) {
+//            registry.registerContainerClickArea(Rectangle(78, 32, 28, 23), BlastFurnaceScreen::class.java, TOASTING)
+        }
+        
+        override fun registerDisplays(registry: DisplayRegistry) {
+            registry.registerRecipeFiller(BarbecueRecipe::class.java, MyRecipeTypes.BARBECUE, ::BarbecueDisplay)
+        }
+    }
+    
+    object MyREIServerPlugin : REIServerPlugin {
+        override fun registerDisplaySerializer(registry: DisplaySerializerRegistry) {
+            registry.register(REIClient.BARBECUE, BarbecueDisplay.serializer(::BarbecueDisplay))
+            
+        }
+        
+        override fun registerMenuInfo(registry: MenuInfoRegistry) {
+        
+        }
+    }
+    
     init {
         MyBlocks.loadClass()
         MyItems.loadClass()
         MyBlockEntityTypes.loadClass()
         MyScreenHandlerTypes.loadClass()
+        MyRecipeTypes.loadClass()
         arrpHelper.packAfter.addRecipe_craftingShaped(MyItems.VAULT)("#", "@", "#")("#", ItemTags.WOODEN_SLABS)("@", Items.BARREL)()
         arrpHelper.packAfter.addRecipe_craftingShapeless(MyItems.ITEM_REDIRECTOR, 1, Items.DROPPER, ConventionalItemTags.COPPER_INGOTS, Items.AMETHYST_SHARD)
         arrpHelper.packAfter.addRecipe_craftingShapeless(MyItems.FLUID_REDIRECTOR, 1, Items.DROPPER, ConventionalItemTags.COPPER_INGOTS, Items.AMETHYST_SHARD, Items.GLASS_PANE)
@@ -286,12 +343,13 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
           .addRegisterCallback(Registry.ITEM.key) {
           
           }
-        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register{ server, resourceManager, success ->
-        
+        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register { server, resourceManager, success ->
+//            server.recipeManager.setRecipes()
         }
         arrpHelper.getTag(AllTags.AllItemTags.UPRIGHT_ON_BELT.tag)
           .add(Items.BOWL)
-        
+        arrpHelper.getTag(MyItemTags.DOUGH)
+          .add(AllItems.DOUGH.id)
         runAtClient {
             ClientSpriteRegistryCallback.event(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE).register { atlasTexture, registry ->
                 registry.register(id("particle/oil_bubble"))
@@ -300,9 +358,12 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
         }
     }
     @JvmStatic
+    @ApiStatus.Internal
     fun afterFDInit() {
         arrpHelper.getTag(AllTags.AllItemTags.UPRIGHT_ON_BELT.tag)
           .add(ItemsRegistry.FRUIT_SALAD.get())
+        arrpHelper.getTag(MyItemTags.DOUGH)
+          .add(ItemsRegistry.WHEAT_DOUGH.get())
     }
 }
 
