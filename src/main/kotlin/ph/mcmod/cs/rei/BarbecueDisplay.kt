@@ -12,7 +12,7 @@ import ph.mcmod.cs.game.SingleRecipe
 import ph.mcmod.cs.game.BarbecueRecipe
 import java.util.*
 
-class BarbecueDisplay(inputs: List<EntryIngredient>, outputs: List<EntryIngredient>, location: Optional<Identifier>) : BasicDisplay(inputs, outputs, location), SimpleGridMenuDisplay {
+open class BarbecueDisplay(inputs: List<EntryIngredient>, outputs: List<EntryIngredient>, location: Optional<Identifier>) : BasicDisplay(inputs, outputs, location), SimpleGridMenuDisplay {
     var duration = SingleRecipe.DEFUALT_DURATION
     
     constructor(inputs: List<EntryIngredient>, outputs: List<EntryIngredient>, extra: NbtCompound) : this(inputs, outputs, Optional.empty()) {
@@ -28,11 +28,11 @@ class BarbecueDisplay(inputs: List<EntryIngredient>, outputs: List<EntryIngredie
     }
     
     override fun getWidth(): Int {
-       return 1
+        return 1
     }
     
     override fun getHeight(): Int {
-       return 1
+        return 1
     }
     
     companion object {

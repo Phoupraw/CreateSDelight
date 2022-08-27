@@ -8,12 +8,19 @@ import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleVariantStorage
 import net.fabricmc.loader.api.FabricLoader
+import net.minecraft.client.network.ClientPlayNetworkHandler
 import net.minecraft.inventory.SimpleInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
+import net.minecraft.particle.ParticleEffect
+import net.minecraft.server.world.ServerWorld
+import net.minecraft.util.math.Position
+import net.minecraft.world.World
 import org.jetbrains.annotations.ApiStatus
 import ph.mcmod.kum.asStorage
+import ph.mcmod.kum.spreadParticles
 import java.util.*
+import kotlin.NoSuchElementException
 import kotlin.annotation.AnnotationTarget.*
 import kotlin.math.floor
 import kotlin.random.asJavaRandom
@@ -88,7 +95,37 @@ fun Float.random(random: Random = kotlin.random.Random.asJavaRandom()): Float {
 //    while (iterator.hasNext())
 //        consumer(iterator.next(), iterator::remove) { break }
 //}
+@ApiStatus.Experimental
+fun World.addParticles(particle: ParticleEffect, alwaysSpawn: Boolean, pos: Position, offset: Position, speed: Double, count: Int) {
+    if (isClient) {
+        if (count == 0) {
+            addParticle(particle,
+              alwaysSpawn,
+              pos.x,
+              pos.y,
+              pos.z,
+              speed * offset.x,
+              speed * offset.y,
+              speed * offset.z)
+        } else {
+            for (i in 0 until count) {
+                addParticle(particle,
+                  alwaysSpawn,
+                  pos.x + random.nextGaussian() * offset.x,
+                  pos.y + random.nextGaussian() * offset.y,
+                  pos.z + random.nextGaussian() * offset.z,
+                  random.nextGaussian() * speed,
+                  random.nextGaussian() * speed,
+                  random.nextGaussian() * speed)
+            }
+        }
+    } else if (this is ServerWorld) {
+        spreadParticles(particle, alwaysSpawn, pos, offset, speed, count)
+    } else {
+        throw IllegalArgumentException(toString())
+    }
+}
 
-
-
-
+fun <K, V> Map<K, V>.getOrThrow(key: K): V {
+    return this[key] ?: throw NoSuchElementException(key.toString())
+}

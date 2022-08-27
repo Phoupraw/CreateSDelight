@@ -7,6 +7,9 @@ import com.nhoryzon.mc.farmersdelight.registry.ItemsRegistry
 import com.simibubi.create.*
 import com.simibubi.create.api.behaviour.BlockSpoutingBehaviour
 import com.simibubi.create.content.logistics.block.mechanicalArm.ArmInteractionPointType
+import com.simibubi.create.foundation.networking.AllPackets
+import com.simibubi.create.foundation.networking.SimplePacketBase
+import me.pepperbell.simplenetworking.SimpleChannel
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry
@@ -16,7 +19,6 @@ import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry
 import me.shedaniel.rei.api.common.util.EntryStacks
-import me.shedaniel.rei.plugin.common.BuiltinPlugin
 import net.devtech.arrp.api.RuntimeResourcePack
 import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
 import net.fabricmc.fabric.api.`object`.builder.v1.block.entity.FabricBlockEntityTypeBuilder
@@ -32,7 +34,6 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.FullItemFluidStorage
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage
-import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant
 import net.fabricmc.fabric.impl.tag.convention.TagRegistration
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.block.Blocks
@@ -43,12 +44,10 @@ import net.minecraft.command.argument.BlockPosArgumentType
 import net.minecraft.entity.effect.StatusEffectInstance
 import net.minecraft.entity.effect.StatusEffects
 import net.minecraft.fluid.Fluids
-import net.minecraft.item.BucketItem
-import net.minecraft.item.FoodComponent
-import net.minecraft.item.Item
-import net.minecraft.item.Items
+import net.minecraft.item.*
 import net.minecraft.particle.DefaultParticleType
-import net.minecraft.recipe.Ingredient
+import net.minecraft.recipe.CampfireCookingRecipe
+import net.minecraft.recipe.RecipeType
 import net.minecraft.screen.PlayerScreenHandler
 import net.minecraft.screen.ScreenHandlerType
 import net.minecraft.server.command.CommandManager
@@ -64,12 +63,13 @@ import org.jetbrains.annotations.ApiStatus
 import ph.mcmod.cs.MyRegistries.MyItems.MUSHROOM_SOUP
 import ph.mcmod.cs.MyRegistries.MyItems.WATER_BOWL
 import ph.mcmod.cs.api.printL
-import ph.mcmod.cs.api.printS
 import ph.mcmod.cs.fluid.AcidFluid
 import ph.mcmod.cs.fluid.TomatoSauceFluid
 import ph.mcmod.cs.game.*
 import ph.mcmod.cs.item.BowlFoodItem
 import ph.mcmod.cs.item.WaterBowlItem
+import ph.mcmod.cs.rei.BarbecueCampfireCatagory
+import ph.mcmod.cs.rei.BarbecueCampfireDisplay
 import ph.mcmod.cs.rei.BarbecueCatagory
 import ph.mcmod.cs.rei.BarbecueDisplay
 import ph.mcmod.kum.*
@@ -88,6 +88,9 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
         val SUNFLOWER_OIL = FluidBlock(MyFluids.SUNFLOWER_OIL, FabricBlockSettings.copyOf(Blocks.WATER))
           .register("sunflower_oil")
           .lang("葵花籽油")
+        val COPPER_TUNNEL = CopperTunnelBlock(FabricBlockSettings.copyOf(Blocks.COPPER_BLOCK))
+          .register("copper_tunnel")
+          .lang("铜隧道")
         //以下都是旧项目的，以后要删掉
         @JvmField
         val VERY_LARGE_BARREL = VeryLargeBarrel.TBlock(FabricBlockSettings.copyOf(Blocks.BARREL)
@@ -133,8 +136,8 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
     }
     
     object MyBlockEntityTypes {
-//        @JvmField
-//        val SHAFT: BlockEntityType<ShaftBlockEntity> = FabricBlockEntityTypeBuilder.create(::ShaftBlockEntity).addBlock(AllBlocks.SHAFT.get()).build().register("shaft")
+        @JvmField
+        val COPPER_TUNNEL: BlockEntityType<CopperTunnelBlockEntity> = FabricBlockEntityTypeBuilder.create(::CopperTunnelBlockEntity).addBlock(MyBlocks.COPPER_TUNNEL).build().register("copper_tunnel")
         
         //以下都是旧项目的，以后要删掉
         @JvmField
@@ -150,6 +153,9 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
     }
     
     object MyItems {
+        @JvmField
+        val COPPER_TUNNEL = BlockItem(MyBlocks.COPPER_TUNNEL, ItemSettings()).register()
+        
         val RAW_CHICKEN_STICK = Item(ItemSettings().food(Foods.CHICKEN_CUTS.get()))
           .register("raw_chicken_stick")
           .lang("生鸡肉串")
@@ -264,6 +270,30 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
         val OIL_BUBBLE: DefaultParticleType = FabricParticleTypes.simple().register("oil_bubble")
     }
     
+    object MyPackets {
+        val CHANNEL_NAME = id("main")
+        val COPPER_TUNNEL_FLAP = MyLoadedPacket(CopperTunnelFlapPacket::class.java, ::CopperTunnelFlapPacket, SimplePacketBase.NetworkDirection.PLAY_TO_CLIENT)
+        
+        init {
+            AllPackets.channel = SimpleChannel(AllPackets.CHANNEL_NAME)
+            var id = 0
+            for (packet in arrayOf(COPPER_TUNNEL_FLAP)) {
+                var registered = false
+                if (packet.direction == SimplePacketBase.NetworkDirection.PLAY_TO_SERVER) {
+                    AllPackets.channel.registerC2SPacket(packet.type, id++)
+                    registered = true
+                }
+                if (packet.direction == SimplePacketBase.NetworkDirection.PLAY_TO_CLIENT) {
+                    AllPackets.channel.registerS2CPacket(packet.type, id++)
+                    registered = true
+                }
+                if (!registered) {
+                    Create.LOGGER.error("Could not register packet with type " + packet.type)
+                }
+            }
+        }
+    }
+    
     object MyRecipeTypes {
         val STEAMING = registerRecipeType("steaming", SteamingRecipe.Serializer)
         val BARBECUE = registerRecipeType("barbecue", BarbecueRecipe.Serializer)
@@ -271,13 +301,19 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
     
     object REIClient : REIClientPlugin {
         val BARBECUE: CategoryIdentifier<BarbecueDisplay> = CategoryIdentifier.of(MyRecipeTypes.BARBECUE.toString())
-        val BARBECUE_TITLE = TranslatableText("category.$namespace.${BARBECUE.path}")
+        val BARBECUE_TITLE = TranslatableText("category.${BARBECUE.namespace}.${BARBECUE.path}")
+        val BARBECUE_CAMPFIRE: CategoryIdentifier<BarbecueDisplay> = CategoryIdentifier.of(id("barbecue_campfire"))
+        val BARBECUE_CAMPFIRE_TITLE = TranslatableText("category.${BARBECUE_CAMPFIRE.namespace}.${BARBECUE_CAMPFIRE.path}")
         
         init {
             arrpHelper.getLang()
               .entry(BARBECUE_TITLE.key, "烧烤")
             arrpHelper.getLang("en_us")
               .entry(BARBECUE_TITLE.key, "Barbecue")
+            arrpHelper.getLang()
+              .entry(BARBECUE_CAMPFIRE_TITLE.key, "烧烤（营火烹饪）")
+            arrpHelper.getLang("en_us")
+              .entry(BARBECUE_CAMPFIRE_TITLE.key, "Barbecue (Campfire Cooking)")
         }
         
         override fun getPluginProviderName(): String {
@@ -286,8 +322,9 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
         
         override fun registerCategories(registry: CategoryRegistry) {
             registry.add(BarbecueCatagory)
-            registry.addWorkstations(BARBECUE, EntryStacks.of(AllBlocks.ITEM_DRAIN.get()), EntryStacks.of(Fluids.LAVA))
-            registry.addWorkstations(BuiltinPlugin.CAMPFIRE, EntryStacks.of(AllBlocks.ITEM_DRAIN.get()), EntryStacks.of(Fluids.LAVA))
+            registry.addWorkstations(BarbecueCatagory.categoryIdentifier, EntryStacks.of(AllBlocks.ITEM_DRAIN.get()), EntryStacks.of(Fluids.LAVA))
+            registry.add(BarbecueCampfireCatagory)
+            registry.addWorkstations(BarbecueCampfireCatagory.categoryIdentifier, EntryStacks.of(AllBlocks.ITEM_DRAIN.get()), EntryStacks.of(Fluids.LAVA))
         }
         
         override fun registerScreens(registry: ScreenRegistry) {
@@ -296,12 +333,14 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
         
         override fun registerDisplays(registry: DisplayRegistry) {
             registry.registerRecipeFiller(BarbecueRecipe::class.java, MyRecipeTypes.BARBECUE, ::BarbecueDisplay)
+            registry.registerRecipeFiller(CampfireCookingRecipe::class.java, RecipeType.CAMPFIRE_COOKING, ::BarbecueCampfireDisplay)
         }
     }
     
     object MyREIServerPlugin : REIServerPlugin {
         override fun registerDisplaySerializer(registry: DisplaySerializerRegistry) {
             registry.register(REIClient.BARBECUE, BarbecueDisplay.serializer(::BarbecueDisplay))
+            registry.register(REIClient.BARBECUE_CAMPFIRE, BarbecueDisplay.serializer(::BarbecueCampfireDisplay))
             
         }
         
@@ -355,6 +394,11 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
             }
         }
         BlockSpoutingBehaviour.addCustomSpoutInteraction(id("depot"), SpoutingOil())
+        arrpHelper.getLang()
+          .entry("$namespace.ponder.item_drain_barbecue.header", "使用分液池烧烤")
+          .entry("$namespace.ponder.item_drain_barbecue.text_1", "装有高温液体的分液池可以烧烤")
+          .entry("$namespace.ponder.item_drain_barbecue.text_2", "液体越多，烧烤越快，1.5桶液体的速度是1桶的5倍")
+          .entry("$namespace.ponder.item_drain_barbecue.text_3", "物品越多，烧烤越慢，1个物品的速度是64个物品的4倍")
         
         Create.registrate()
           .addRegisterCallback(Registry.BLOCK.key) {
@@ -400,6 +444,7 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
     }
     
     fun RuntimeResourcePack.addRecipe_barbecue(ingredient: Identifiable, result: Identifiable) = addRecipe_barbecue(ingredient, result, recipeId = id(ingredient.id.path).pre("barbecue/"))
+    
 }
 
 fun RuntimeResourcePack.addRecipe_barbecue(ingredient: Identifiable, result: Identifiable, duration: Double = SingleRecipe.DEFUALT_DURATION, recipeId: Identifier = result.id.pre("barbecue/")): ByteArray {

@@ -18,7 +18,7 @@ import net.minecraft.text.TranslatableText
 import ph.mcmod.cs.MyRegistries
 import java.text.DecimalFormat
 
-object BarbecueCatagory : DisplayCategory<BarbecueDisplay> {
+open class BarbecueCatagory : DisplayCategory<BarbecueDisplay> {
     override fun getCategoryIdentifier(): CategoryIdentifier<out BarbecueDisplay> {
         return MyRegistries.REIClient.BARBECUE
     }
@@ -38,11 +38,11 @@ object BarbecueCatagory : DisplayCategory<BarbecueDisplay> {
         val widgets: MutableList<Widget> = Lists.newArrayList()
         widgets.add(Widgets.createRecipeBase(bounds))
         widgets.add(Widgets.createResultSlotBackground(Point(startPoint.x + 61, startPoint.y + 0)))
-        widgets.add(Widgets.createSlot(Point(startPoint.x + 1, startPoint.y + 0))
-          .entries(listOf(EntryStacks.of(Fluids.LAVA)))
-          .disableBackground()
-          .disableTooltips()
-          .disableHighlight())
+//        widgets.add(Widgets.createSlot(Point(startPoint.x + 1, startPoint.y + 0))
+//          .entries(listOf(EntryStacks.of(Fluids.LAVA)))
+//          .disableBackground()
+//          .disableTooltips()
+//          .disableHighlight())
         widgets.add(Widgets.createLabel(Point(bounds.x + bounds.width - 5, bounds.y + 5), TranslatableText("category.rei.campfire.time", df.format(duration / 20.0)))
           .noShadow()
           .rightAligned()
@@ -70,4 +70,6 @@ object BarbecueCatagory : DisplayCategory<BarbecueDisplay> {
     override fun getDisplayWidth(display: BarbecueDisplay): Int {
         return 130
     }
+    
+    companion object:BarbecueCatagory()
 }

@@ -16,6 +16,7 @@
     "MixinItemDrainTileEntity",
     "MixinItems",
     "MixinMinecraftServer",
+    "MixinPonderIndex",
     "MixinServerWorld",
     "MixinSpoutTileEntity"
   ],
@@ -23,8 +24,8 @@
     "MixinBasinRenderer",
     "MixinBracketedKineticTileRenderer",
     "MixinDepotRenderer",
-    "MixinSafeTileEntityRenderer",
-    "MixinItemDrainRenderer"
+    "MixinItemDrainRenderer",
+    "MixinSafeTileEntityRenderer"
   ],
   "injectors": {
     "defaultRequire": 1
