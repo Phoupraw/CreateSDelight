@@ -249,8 +249,14 @@ interface InjectItemDrainTileEntity {
             heldItem ?: return false
             val world = te.world ?: return false
             val insertedFrom = heldItem.insertedFrom
+            return isBlockedByTunnel(te, heldItem.insertedFrom)
+        }
+        
+        fun isBlockedByTunnel(te: ItemDrainTileEntity, direction: Direction): Boolean {
+            if (direction.axis.isVertical) return false
+            val world = te.world ?: return false
             world.getBlockState(te.pos.up()).takeIf { it.block is CopperTunnelBlock }?.also { blockState1 ->
-                val openState = blockState1.get(CopperTunnelBlock.OPEN_STATES[insertedFrom])
+                val openState = blockState1.get(CopperTunnelBlock.OPEN_STATES[direction])
                 if (openState == CopperTunnelBlock.OpenState.CLOSE || openState == CopperTunnelBlock.OpenState.WINDOW) {
                     return true
                 }
@@ -271,6 +277,13 @@ interface InjectItemDrainTileEntity {
                 }
             }
             return itemMovementPerTick
+        }
+        
+        @JvmStatic
+        fun cancelInput(te: ItemDrainTileEntity, heldItem: TransportedItemStack?, transportedStack: TransportedItemStack, side: Direction, simulate: Boolean, cir: CallbackInfoReturnable<ItemStack>) {
+            if (isBlockedByTunnel(te, side.opposite)) {
+                cir.returnValue = transportedStack.stack
+            }
         }
     }
 }

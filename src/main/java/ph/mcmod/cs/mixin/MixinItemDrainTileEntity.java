@@ -40,7 +40,8 @@ public abstract class MixinItemDrainTileEntity implements InjectItemDrainTileEnt
     @Shadow
     protected int processingTicks;
 
-    @Shadow protected abstract float itemMovementPerTick();
+    @Shadow
+    protected abstract float itemMovementPerTick();
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void particle(CallbackInfo ci) {
@@ -102,8 +103,14 @@ public abstract class MixinItemDrainTileEntity implements InjectItemDrainTileEnt
     private boolean cancelThrow(BlockState blockState, BlockView world, BlockPos pos, Direction side) {
         return InjectItemDrainTileEntity.cancelThrow((ItemDrainTileEntity) (Object) this, heldItem, blockState, world, pos, side);
     }
-    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lcom/simibubi/create/content/contraptions/fluids/actors/ItemDrainTileEntity;itemMovementPerTick()F",ordinal = 0))
-    private float cancelMovement(ItemDrainTileEntity instance){
+
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lcom/simibubi/create/content/contraptions/fluids/actors/ItemDrainTileEntity;itemMovementPerTick()F", ordinal = 0))
+    private float cancelMovement(ItemDrainTileEntity instance) {
         return InjectItemDrainTileEntity.cancelMovement((ItemDrainTileEntity) (Object) this, heldItem, itemMovementPerTick());
+    }
+
+    @Inject(method = "tryInsertingFromSide", at = @At("HEAD"),cancellable = true)
+    private void cancelInput(TransportedItemStack transportedStack, Direction side, boolean simulate, CallbackInfoReturnable<ItemStack> cir) {
+        InjectItemDrainTileEntity.cancelInput((ItemDrainTileEntity) (Object) this, heldItem, transportedStack, side, simulate,cir);
     }
 }
