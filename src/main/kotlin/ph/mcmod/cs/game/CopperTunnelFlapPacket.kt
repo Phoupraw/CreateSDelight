@@ -7,7 +7,7 @@ import net.minecraft.util.math.Direction
 import org.apache.commons.lang3.tuple.Pair
 import java.util.ArrayList
 
-class CopperTunnelFlapPacket : TileEntityDataPacket<BeltTunnelTileEntity> {
+class CopperTunnelFlapPacket : TileEntityDataPacket<CopperTunnelBlockEntity> {
     private var flaps: MutableList<Pair<Direction, Boolean>>
     
     constructor(buffer: PacketByteBuf) : super(buffer) {
@@ -32,7 +32,7 @@ class CopperTunnelFlapPacket : TileEntityDataPacket<BeltTunnelTileEntity> {
         }
     }
     
-    override fun handlePacket(tile: BeltTunnelTileEntity) {
+    override fun handlePacket(tile: CopperTunnelBlockEntity) {
         for (flap in flaps) {
             tile.flap(flap.left, flap.right)
         }

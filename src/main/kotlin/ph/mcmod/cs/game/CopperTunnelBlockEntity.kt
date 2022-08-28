@@ -67,6 +67,11 @@ class CopperTunnelBlockEntity(pos: BlockPos?, state: BlockState?) : SmartTileEnt
         flaps.forEach { (d: Direction?, value: LerpedFloat) -> value.tickChaser() }
     }
     
+    override fun notifyUpdate() {
+        super.notifyUpdate()
+        updateFlaps()
+    }
+    
     override fun addBehaviours(behaviours: MutableList<TileEntityBehaviour>?) {
     
     }
@@ -96,10 +101,11 @@ class CopperTunnelBlockEntity(pos: BlockPos?, state: BlockState?) : SmartTileEnt
     }
     
     fun updateFlaps() {
-        flaps.clear()
         for ((side, property) in CopperTunnelBlock.OPEN_STATES) {
             if (cachedState[property] == CopperTunnelBlock.OpenState.CURTAIN) {
-                flaps[side] = createChasingFlap()
+                flaps.putIfAbsent(side,createChasingFlap())
+            } else {
+                flaps -= side
             }
         }
     }

@@ -9,7 +9,6 @@ import com.simibubi.create.api.behaviour.BlockSpoutingBehaviour
 import com.simibubi.create.content.logistics.block.mechanicalArm.ArmInteractionPointType
 import com.simibubi.create.foundation.networking.AllPackets
 import com.simibubi.create.foundation.networking.SimplePacketBase
-import me.pepperbell.simplenetworking.SimpleChannel
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry
@@ -271,12 +270,12 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
     }
     
     object MyPackets {
-        val CHANNEL_NAME = id("main")
+//        val CHANNEL_NAME = id("main")
+//        val CHANNEL = SimpleChannel(CHANNEL_NAME)
         val COPPER_TUNNEL_FLAP = MyLoadedPacket(CopperTunnelFlapPacket::class.java, ::CopperTunnelFlapPacket, SimplePacketBase.NetworkDirection.PLAY_TO_CLIENT)
         
         init {
-            AllPackets.channel = SimpleChannel(AllPackets.CHANNEL_NAME)
-            var id = 0
+            var id = AllPackets.values().size
             for (packet in arrayOf(COPPER_TUNNEL_FLAP)) {
                 var registered = false
                 if (packet.direction == SimplePacketBase.NetworkDirection.PLAY_TO_SERVER) {
@@ -288,7 +287,7 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
                     registered = true
                 }
                 if (!registered) {
-                    Create.LOGGER.error("Could not register packet with type " + packet.type)
+                    LOGGER.warning("Could not register packet with type " + packet.type)
                 }
             }
         }

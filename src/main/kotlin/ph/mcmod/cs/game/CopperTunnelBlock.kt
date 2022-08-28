@@ -7,6 +7,8 @@ import com.simibubi.create.content.contraptions.fluids.actors.ItemDrainBlock
 import com.simibubi.create.content.contraptions.wrench.IWrenchable
 import com.simibubi.create.content.logistics.block.belts.tunnel.BeltTunnelBlock
 import com.simibubi.create.foundation.block.ITE
+import com.simibubi.create.foundation.tileEntity.SmartTileEntity
+import com.simibubi.create.foundation.tileEntity.behaviour.belt.DirectBeltInputBehaviour
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.ShapeContext
@@ -24,6 +26,7 @@ import net.minecraft.world.World
 import net.minecraft.world.WorldAccess
 import net.minecraft.world.WorldView
 import ph.mcmod.cs.MyRegistries
+import ph.mcmod.cs.api.printS
 import ph.mcmod.kum.EnumStringIdentifiable
 import ph.mcmod.kum.get
 
@@ -57,8 +60,11 @@ class CopperTunnelBlock(settings: Settings?) : Block(settings), ITE<CopperTunnel
                 resultState = resultState.with(property, OpenState.NONE)
             } else {
                 val neighborDrain = world.getBlockState(pos.offset(direction).down())
-                if (neighborDrain.block is ItemDrainBlock) {
-                    resultState = resultState.with(property, OpenState.CURTAIN)
+                resultState = resultState.with(property, OpenState.WINDOW)
+                (world.getBlockEntity(pos.offset(direction).down()) as? SmartTileEntity)?.also { te ->
+                    if (te.getBehaviour(DirectBeltInputBehaviour.TYPE) != null) {
+                        resultState = resultState.with(property, OpenState.CURTAIN)
+                    }
                 }
             }
         }
@@ -67,8 +73,30 @@ class CopperTunnelBlock(settings: Settings?) : Block(settings), ITE<CopperTunnel
     
     override fun getStateForNeighborUpdate(state: BlockState, direction: Direction, neighborState: BlockState, world: WorldAccess, pos: BlockPos, neighborPos: BlockPos): BlockState {
         var resultState = super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos)
-        
-        
+        if (direction in OPEN_STATES) {
+            val property = OPEN_STATES[direction]
+            if (neighborState.block is CopperTunnelBlock) {
+//                println("$pos $direction $neighborState")
+                val property1 = OPEN_STATES[direction.opposite]
+                if (neighborState.get(property1) == OpenState.CURTAIN || neighborState.get(property1) == OpenState.NONE) {
+                    resultState = resultState.with(property, OpenState.NONE)
+                } else {
+                    resultState = resultState.with(property, neighborState.get(property1))
+                }
+            } else {
+//                println(1   )
+                resultState = resultState.with(property, OpenState.WINDOW)
+                (world.getBlockEntity(neighborPos.down()) as? SmartTileEntity)?.also { te ->
+                    if (te.getBehaviour(DirectBeltInputBehaviour.TYPE) != null) {
+                        resultState = resultState.with(property, OpenState.CURTAIN)
+                    }
+                }
+            }
+        }
+        (world.getBlockEntity(pos) as? CopperTunnelBlockEntity)?.apply {
+            cachedState=resultState
+            updateFlaps()
+        }
         return resultState
     }
     
@@ -86,6 +114,7 @@ class CopperTunnelBlock(settings: Settings?) : Block(settings), ITE<CopperTunnel
         super.onBlockAdded(state, world, pos, oldState, notify)
         (world.getBlockEntity(pos) as? CopperTunnelBlockEntity)?.updateFlaps()
     }
+    
     override fun getTileEntityClass(): Class<CopperTunnelBlockEntity> {
         return CopperTunnelBlockEntity::class.java
     }
@@ -97,6 +126,7 @@ class CopperTunnelBlock(settings: Settings?) : Block(settings), ITE<CopperTunnel
     override fun onWrenched(state: BlockState, context: ItemUsageContext): ActionResult {
         val side = context.side
         context.world.setBlockState(context.blockPos, state.cycle(OPEN_STATES[side]))
+        ( context.world.getBlockEntity(context.blockPos) as? CopperTunnelBlockEntity)?.updateFlaps()
         return ActionResult.SUCCESS
     }
     

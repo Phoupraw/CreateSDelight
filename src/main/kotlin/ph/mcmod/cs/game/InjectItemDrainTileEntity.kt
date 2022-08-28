@@ -1,16 +1,18 @@
 package ph.mcmod.cs.game
 
-import com.nhoryzon.mc.farmersdelight.registry.ItemsRegistry
 import com.simibubi.create.AllBlocks
 import com.simibubi.create.content.contraptions.fluids.actors.ItemDrainTileEntity
 import com.simibubi.create.content.contraptions.processing.EmptyingByBasin
 import com.simibubi.create.content.contraptions.relays.belt.transport.TransportedItemStack
 import com.simibubi.create.foundation.ponder.PonderWorld
+import com.simibubi.create.foundation.tileEntity.TileEntityBehaviour
+import com.simibubi.create.foundation.tileEntity.behaviour.BehaviourType
+import com.simibubi.create.foundation.utility.BlockHelper
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil
-import net.minecraft.client.world.ClientWorld
+import net.minecraft.block.BlockState
 import net.minecraft.fluid.Fluids
 import net.minecraft.inventory.Inventory
 import net.minecraft.inventory.SimpleInventory
@@ -26,8 +28,8 @@ import net.minecraft.sound.SoundEvents
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.util.math.Vec3d
+import net.minecraft.world.BlockView
 import net.minecraft.world.World
-import org.apache.logging.log4j.ThreadContext.setStack
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable
 import ph.mcmod.cs.MyRegistries
 import ph.mcmod.cs.api.*
@@ -195,6 +197,81 @@ interface InjectItemDrainTileEntity {
                 heldItem.angle = (insertedFrom.horizontal) * 90 - 45
             }
         }
+        
+        @JvmStatic
+        fun flapWhenInput(te: ItemDrainTileEntity, heldItem: TransportedItemStack?, transportedStack: TransportedItemStack?, side: Direction, simulate: Boolean) {
+            val world = te.world ?: return
+            (world.getBlockEntity(te.pos.up()) as? CopperTunnelBlockEntity)?.also { tunnel ->
+                tunnel.flap(side.opposite, true)
+            }
+        }
+        
+        @JvmStatic
+        fun flapWhenOutput(te: ItemDrainTileEntity, heldItem: TransportedItemStack?, side: Direction) {
+            val world = te.world ?: return
+            (world.getBlockEntity(te.pos.up()) as? CopperTunnelBlockEntity)?.also { tunnel ->
+                tunnel.flap(side, false)
+            }
+        }
+        
+        @JvmStatic
+        fun cancelOutput(te: ItemDrainTileEntity, heldItem: TransportedItemStack?, world: BlockView, pos: BlockPos, type: BehaviourType<TileEntityBehaviour>): TileEntityBehaviour? {
+            if (heldItem != null) {
+                world.getBlockState(te.pos.up()).takeIf { it.block is CopperTunnelBlock }?.also { blockState ->
+                    val openState = blockState.get(CopperTunnelBlock.OPEN_STATES[heldItem.insertedFrom])
+                    if (openState == CopperTunnelBlock.OpenState.CLOSE || openState == CopperTunnelBlock.OpenState.WINDOW) {
+                        return null
+                    }
+                }
+            }
+            return TileEntityBehaviour.get(world, pos, type)
+        }
+        
+        @JvmStatic
+        fun cancelThrow(te: ItemDrainTileEntity, heldItem: TransportedItemStack?, blockState: BlockState, world: BlockView, pos: BlockPos, side: Direction): Boolean {
+            return isBlocked(te, heldItem)
+        }
+        
+        @JvmStatic
+        fun flapWhenThrow(te: ItemDrainTileEntity, heldItem: TransportedItemStack?, side: Direction) {
+            flapWhenOutput(te, heldItem, side)
+        }
+        
+        fun isBlockedBySolid(te: ItemDrainTileEntity, heldItem: TransportedItemStack?): Boolean {
+            heldItem ?: return false
+            val world = te.world ?: return false
+            val insertedFrom = heldItem.insertedFrom
+            val nextPos = te.pos.offset(insertedFrom)
+            return BlockHelper.hasBlockSolidSide(world.getBlockState(nextPos), world, nextPos, insertedFrom.opposite)
+        }
+        
+        fun isBlockedByTunnel(te: ItemDrainTileEntity, heldItem: TransportedItemStack?): Boolean {
+            heldItem ?: return false
+            val world = te.world ?: return false
+            val insertedFrom = heldItem.insertedFrom
+            world.getBlockState(te.pos.up()).takeIf { it.block is CopperTunnelBlock }?.also { blockState1 ->
+                val openState = blockState1.get(CopperTunnelBlock.OPEN_STATES[insertedFrom])
+                if (openState == CopperTunnelBlock.OpenState.CLOSE || openState == CopperTunnelBlock.OpenState.WINDOW) {
+                    return true
+                }
+            }
+            return false
+        }
+        
+        fun isBlocked(te: ItemDrainTileEntity, heldItem: TransportedItemStack?): Boolean {
+            return isBlockedBySolid(te, heldItem) || isBlockedByTunnel(te, heldItem)
+        }
+        
+        @JvmStatic
+        fun cancelMovement(te: ItemDrainTileEntity, heldItem: TransportedItemStack?, itemMovementPerTick: Float): Float {
+            heldItem ?: return itemMovementPerTick
+            if (heldItem.beltPosition >= 5f / 8) {
+                if (isBlocked(te, heldItem)) {
+                    return (0.75f - heldItem.beltPosition)
+                }
+            }
+            return itemMovementPerTick
+        }
     }
 }
 
@@ -207,4 +284,4 @@ private typealias Switch1 = (world: World, fluidVariant: FluidVariant, amount: L
  * @param world
  * @see InjectItemDrainTileEntity.switch2
  */
-private typealias Switch2 = (world: World, fluidVariant: FluidVariant, amount: Long, random: Random, chance/*TODO 换个名字，比如占用率？*/: Double, blockPos: BlockPos, temperature: Int, heldItem: TransportedItemStack, heldItemStack: ItemStack, recipe: SingleRecipe) -> Unit
+private typealias Switch2 = (world: World, fluidVariant: FluidVariant, amount: Long, random: Random, chance/*TODO 换个名字，比如液体容量百分比？*/: Double, blockPos: BlockPos, temperature: Int, heldItem: TransportedItemStack, heldItemStack: ItemStack, recipe: SingleRecipe) -> Unit
