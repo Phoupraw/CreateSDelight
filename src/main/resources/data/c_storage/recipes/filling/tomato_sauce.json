@@ -1,5 +1,0 @@
-{
-  "type": "create:filling1",
-  "ingredients": [{"item": "minecraft:bowl"}, {"fluid": "c_storage:tomato_sauce", "amount": 27000}],
-  "results": [{"item": "farmersdelight:tomato_sauce"}]
-}

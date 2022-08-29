@@ -2,20 +2,30 @@
 
 package ph.mcmod.cs
 
+import com.jozufozu.flywheel.util.transform.TransformStack
+import com.simibubi.create.AllBlocks
+import com.simibubi.create.AllTags
 import com.simibubi.create.content.contraptions.base.KineticTileEntity
 import com.simibubi.create.content.contraptions.base.KineticTileEntityRenderer
 import com.simibubi.create.content.contraptions.fluids.actors.ItemDrainItemHandler
 import com.simibubi.create.content.contraptions.fluids.actors.ItemDrainTileEntity
+import com.simibubi.create.content.contraptions.processing.BasinRenderer
+import com.simibubi.create.content.contraptions.processing.BasinTileEntity
 import com.simibubi.create.content.contraptions.processing.EmptyingByBasin
 import com.simibubi.create.content.contraptions.relays.belt.transport.TransportedItemStack
 import com.simibubi.create.content.contraptions.relays.elementary.BracketedKineticTileEntity
 import com.simibubi.create.content.contraptions.relays.elementary.BracketedKineticTileRenderer
 import com.simibubi.create.foundation.tileEntity.behaviour.belt.TransportedItemStackHandlerBehaviour
+import com.simibubi.create.foundation.tileEntity.behaviour.fluid.SmartFluidTankBehaviour
 import com.simibubi.create.foundation.tileEntity.renderer.SafeTileEntityRenderer
 import com.simibubi.create.foundation.utility.AnimationTickHolder
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView
 import net.fabricmc.fabric.api.transfer.v1.storage.base.BlankVariantView
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction
@@ -50,15 +60,15 @@ import net.minecraft.util.Hand
 import net.minecraft.util.Identifier
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.*
+import net.minecraft.util.shape.VoxelShapes
 import net.minecraft.world.World
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args
+import ph.mcmod.cs.game.FTemperature
 import ph.mcmod.cs.game.RoastingGrill
-import ph.mcmod.kum.get
-import ph.mcmod.kum.isEmpty
-import ph.mcmod.kum.spreadParticles
-import ph.mcmod.kum.toInt
+import ph.mcmod.kum.*
 import java.util.*
-import kotlin.math.min
+import kotlin.math.*
 
 internal object MixinDelegates {
     @Deprecated("修不了BUG，不修了，直接放弃这个功能")
@@ -94,7 +104,7 @@ internal object MixinDelegates {
         return ActionResult.PASS
     }
     
-    internal fun getCampfireCookingRecipe(te: ItemDrainTileEntity, transaction: TransactionContext?, itemVariant: ItemVariant): CampfireCookingRecipe? {
+    fun getCampfireCookingRecipe(te: ItemDrainTileEntity, transaction: TransactionContext?, itemVariant: ItemVariant): CampfireCookingRecipe? {
         Transaction.openNested(Transaction.getCurrentUnsafe()).use { transaction1 ->
             if (getFluidStorageView(te).run {
                   amount >= 1000 && FluidVariantAttributes.getTemperature(resource) >= 1000
@@ -113,7 +123,7 @@ internal object MixinDelegates {
         return null
     }
     
-    internal fun getFluidStorageView(te: ItemDrainTileEntity): StorageView<FluidVariant> {
+    fun getFluidStorageView(te: ItemDrainTileEntity): StorageView<FluidVariant> {
         Transaction.openNested(Transaction.getCurrentUnsafe()).use { transaction ->
             te.getFluidStorage(Direction.DOWN)?.let { storage ->
                 for (storageView in storage.iterable(transaction)) {
@@ -124,20 +134,20 @@ internal object MixinDelegates {
         return BlankVariantView(FluidVariant.blank(), 0)
     }
     
-    internal fun shouldSteam(te: ItemDrainTileEntity): Boolean {
+    fun shouldSteam(te: ItemDrainTileEntity): Boolean {
         return getFluidStorageView(te).run {
-            resource.fluid.isIn(FluidTags.WATER) && te.world?.getBlockState(te.pos.down())?.isOf(Blocks.LAVA) == true
+            resource.fluid.isIn(FluidTags.WATER) && te.world?.getBlockState(te.pos.down())?.isOf(AllBlocks.LIT_BLAZE_BURNER.get()) == true
         }
     }
     
-    internal fun getSteamRecipe(te: ItemDrainTileEntity, itemVariant: ItemVariant): Recipe<Inventory>? {
+    fun getSteamRecipe(te: ItemDrainTileEntity, itemVariant: ItemVariant): Recipe<Inventory>? {
         Transaction.openNested(Transaction.getCurrentUnsafe()).use { transaction ->
             if (shouldSteam(te)) {
                 val world = te.world
                 if (world is ServerWorld) {
                     val tempInv = SimpleInventory(1)
                     tempInv.setStack(0, itemVariant.toStack())
-                    val optional = world.server.recipeManager.getFirstMatch(RecipeType.CAMPFIRE_COOKING, tempInv, world)
+                    val optional = world.server.recipeManager.getFirstMatch(MyRegistries.MyRecipeTypes.STEAMING, tempInv, world)
                     if (optional.isPresent) {
                         return optional.get()
                     }
@@ -180,21 +190,21 @@ internal object MixinDelegates {
         if (EmptyingByBasin.canItemBeEmptied(world, stack)) {
             return true
         }
-        getCampfireCookingRecipe(te, null, ItemVariant.of(stack))?.also { recipe ->
-            heldItem.stack = recipe.output
-            return false
-        }
-        getSteamRecipe(te, ItemVariant.of(stack))?.also { recipe ->
-            stack.orCreateNbt.putInt("restTime", 100)
-            return true
-        }
+//        getCampfireCookingRecipe(te, null, ItemVariant.of(stack))?.also { recipe ->
+//            heldItem.stack = recipe.output
+//            return false
+//        }
+//        getSteamRecipe(te, ItemVariant.of(stack))?.also { recipe ->
+//            stack.orCreateNbt.putInt("restTime", 100)
+//            return true
+//        }
         
         return false
     }
     
     @JvmStatic
     fun check(te: ItemDrainTileEntity, world: World, stack: ItemStack): Boolean {
-        return EmptyingByBasin.canItemBeEmptied(world, stack) || getCampfireCookingRecipe(te, null, ItemVariant.of(stack)) != null
+        return EmptyingByBasin.canItemBeEmptied(world, stack) //|| getCampfireCookingRecipe(te, null, ItemVariant.of(stack)) != null
     }
     @JvmStatic
     fun steam(te: ItemDrainTileEntity, heldItem: TransportedItemStack, cir: CallbackInfoReturnable<Boolean>): Int? {
@@ -217,6 +227,7 @@ internal object MixinDelegates {
         return null
     }
     
+    @Environment(EnvType.CLIENT)
     @JvmStatic
     fun renderRoastingItem(renderer: BracketedKineticTileRenderer, te: KineticTileEntity, partialTicks: Float, ms: MatrixStack, buffer: VertexConsumerProvider, light: Int, overlay: Int) {
 //        println(1)
@@ -241,8 +252,9 @@ internal object MixinDelegates {
                 val angle = (time * te.speed * 3f / 10 + offset) % 360 / 180 * Math.PI.toFloat()
                 ms.multiply(Quaternion(axis[true].unitVector, angle, false))
                 ms.multiply(Quaternion(Vec3f(0f, 1f, 0f), 90f, true))
+//                ms.translate(-0.5, -0.5, -0.5)
                 ms.translate(0.0, 0.2, 0.0)
-                val scale = 2.7f
+                val scale = 3f
                 ms.scale(scale, scale, scale)
                 itemRenderer.renderItem(modelStack, ModelTransformation.Mode.FIXED, light, overlay, ms, buffer, 0)
                 ms.pop()
@@ -291,4 +303,159 @@ internal object MixinDelegates {
         }
     }
     
+    private val boilingPoses = mutableSetOf<BlockPos>()
+    private fun mapTemperature(te: BasinTileEntity): Double {
+        return ((te as FTemperature).temperature - 25) / 75
+    }
+    @JvmStatic
+    fun tickBoil(te: BasinTileEntity) {
+        val t1 = mapTemperature(te)
+        val t2 = t1.pow(3)
+        (te as FTemperature).apply {
+            animationTicks += t2
+        }
+        val world = te.world as? ServerWorld ?: return
+        val blockPos = te.pos
+        if (world.getBlockState(blockPos.down()).isIn(AllTags.AllBlockTags.FAN_HEATERS.tag) && run {
+              Transaction.openOuter().use { transaction ->
+                  for (view in (te.getFluidStorage(null) ?: return@use).iterator(transaction)) {
+                      if (view.resource.fluid.isIn(FluidTags.WATER)) {
+                          return@run true
+                      }
+                  }
+              }
+              false
+          }) {
+            
+            (te as FTemperature).apply {
+                temperature = min(100.0, temperature + 0.5)
+            }
+//            boilingPoses += blockPos
+            val pressure = run {
+                val upPos = blockPos.up()
+                VoxelShapes.adjacentSidesCoverSquare(te.cachedState.getOutlineShape(world, blockPos), world.getBlockState(upPos).getOutlineShape(world, upPos), Direction.UP)
+            }
+            if (pressure) {
+            
+            }
+            val pos = blockPos.toCenter()
+            val random = world.random
+            if (random.nextDouble() < t2) {
+                if (random.nextInt(2) == 0) {
+                    world.spreadParticles(ParticleTypes.SPLASH, false, pos, 0.1, 0.0, 1)
+                    world.spreadParticles(ParticleTypes.BUBBLE, false, pos, 0.1, 0.0, 1)
+                    if (random.nextInt(4) == 0) {
+                        world.spreadParticles(ParticleTypes.POOF, false, pos, 0.1, 0.0, 1)
+                    }
+                }
+            }
+        } else {
+            (te as FTemperature).apply {
+                temperature = max(25.0, temperature - 0.5)
+            }
+//            boilingPoses-=blockPos
+        }
+        te.notifyUpdate()
+    }
+    
+    @JvmStatic
+    fun changeLevel(renderer: BasinRenderer, value: Float, min: Float, max: Float, te: BasinTileEntity, partialTicks: Float, ms: MatrixStack, buffer: VertexConsumerProvider, light: Int, overlay: Int): Float {
+//        println(partialTicks)
+        if (te.pos.x == 23) {
+//            println(partialTicks)
+        }
+        val origin = MathHelper.clamp(value, min, max)
+        return origin
+    }
+    
+    @Environment(EnvType.CLIENT)
+    @JvmStatic
+    fun changeHeight(renderer: BasinRenderer, args: Args, te: BasinTileEntity, partialTicks: Float, ms: MatrixStack, buffer: VertexConsumerProvider, light: Int, overlay: Int, fluidLevel: Float, level: Float, pos: BlockPos, random: Random, inv: Storage<ItemVariant>, stacksSize: Int, stacks: List<ItemStack>, anglePartition: Float, stack: ItemStack) {
+        val t1 = mapTemperature(te)
+        val world = te.world ?: return
+        val hashCode = stack.item.hashCode()
+        val hashOffset = hashCode.toDouble() / Int.MAX_VALUE
+        val amplitude = min(min(fluidLevel, 0.15f), 1 - fluidLevel) * t1.pow(3)
+        val baseVector = args.get<Vec3d>(0)
+        val degree = args.get<Double>(1)
+        val cycle0 = 229
+        val ticks = (te as FTemperature).animationTicks + partialTicks * t1.pow(3)
+        val partial0 = (ticks % cycle0 / cycle0 + hashOffset) * PI * 2
+        val sin0 = sin(sin(partial0) * PI * 2)
+        val floating = (sin0 * amplitude)
+        val value = baseVector.y
+        val min = 0.125
+        val max = 0.6
+        val offset =
+          if (value - amplitude < min)
+              min - (value - amplitude)
+          else if (value + amplitude > max)
+              max - (value + amplitude)
+          else 0.0
+        args[0] = Vec3d(baseVector.x/* (1 + sin0 * 0.5) */, value + floating + offset, baseVector.z)
+        val cycle1 = 1397
+        val partial1 = ((world.time + partialTicks) % cycle1 / cycle1 + hashOffset) * PI * 2
+        val sin1 = sin(partial1)
+//        args[1] = degree + sin1 * 360 * hashOffset.sign
+        
+    }
+    @Environment(EnvType.CLIENT)
+    @JvmStatic
+    fun rotate(renderer: BasinRenderer, te: BasinTileEntity, partialTicks: Float, ms: MatrixStack, buffer: VertexConsumerProvider, light: Int, overlay: Int, fluidLevel: Float, level: Float, pos: BlockPos, random: Random, inv: Storage<ItemVariant>, stackCount: Int, stacks: MutableList<ItemStack>, anglePartition: Float, stack: ItemStack) {
+        val world = te.world ?: return
+        val hashCode = stack.item.hashCode()
+        val hashOffset = hashCode.toDouble() / Int.MAX_VALUE
+        val t1 = mapTemperature(te)
+        val ticks = (te as FTemperature).animationTicks + partialTicks * t1.pow(3)
+        fun cycle(period: Int) = sin((ticks % period / period + hashOffset) * PI * 2) * 360
+//        infix fun Float.cycle(cycle:Int) = this modAndDiv cycle
+        val amplitude = min(min(fluidLevel, 0.15f), 1 - fluidLevel)
+
+//        val cycle1 = 697
+//        val partial1 = ((world.time + partialTicks) % cycle1 / cycle1 + hashOffset) * PI * 2
+//        val sin1 = sin(partial1)
+        val translation = 4.0 / 30
+//        ms.translate(0.0,0.0,0.0)
+//        val degree = sin(partial1) * 360
+//        val radian = degree / 180 * PI
+//        ms.translate(0.0,2.0,0.0)
+        ms.translate(0.0, translation, 0.0)
+        TransformStack.cast(ms)
+          .rotateX(cycle(397))
+          .rotateY(cycle(597))
+          .rotateZ(cycle(797))
+        ms.translate(0.0, -translation, 0.0)
+
+//        ms.translate(-translation,-translation,-translation)
+    }
+    
+    @JvmStatic
+    fun renderFluids(renderer: BasinRenderer, te: BasinTileEntity, partialTicks: Float, ms: MatrixStack, buffer: VertexConsumerProvider, light: Int, overlay: Int) {
+//        BasinRenderer
+    }
+    
+    @JvmStatic
+    fun calcFluidLevel(renderer: BasinRenderer, basin: BasinTileEntity, partialTicks: Float, ms: MatrixStack, buffer: VertexConsumerProvider, light: Int, overlay: Int): Float {
+        val inputFluids = basin.getBehaviour(SmartFluidTankBehaviour.INPUT)
+        val outputFluids = basin.getBehaviour(SmartFluidTankBehaviour.OUTPUT)
+        val tanks = arrayOf(inputFluids, outputFluids)
+        val totalUnits: Float = basin.getTotalFluidUnits(partialTicks)
+        if (totalUnits < 1)
+            return 0f
+        
+        var fluidLevel = MathHelper.clamp(totalUnits / (FluidConstants.BUCKET * 2), 0f, 1f)
+        
+        fluidLevel = 1 - (1 - fluidLevel) * (1 - fluidLevel)
+        
+        val xMin = 2 / 16f
+        val xMax = 2 / 16f
+        val yMin = 2 / 16f
+        val yMax = yMin + 12 / 16f * fluidLevel
+        val zMin = 2 / 16f
+        val zMax = 14 / 16f
+        return yMax
+    }
+//    private fun lerpTemperature(te:BasinTileEntity,):Double{
+//        return MathHelper.clamp()
+//    }
 }

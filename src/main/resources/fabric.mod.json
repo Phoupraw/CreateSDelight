@@ -15,7 +15,19 @@
   "mixins": ["c_storage.mixins.json"],
   "entrypoints": {
     "main": ["ph.mcmod.cs.Main::init"],
-    "client": ["ph.mcmod.cs.ClientMain::init"]
+    "client": ["ph.mcmod.cs.ClientMain::init"],
+    "rei_client": [
+      {
+        "adapter": "kotlin",
+        "value": "ph.mcmod.cs.MyRegistries$REIClient"
+      }
+    ],
+    "rei_server": [
+      {
+        "adapter": "kotlin",
+        "value": "ph.mcmod.cs.MyRegistries$MyREIServerPlugin"
+      }
+    ]
   },
   "depends": {
     "minecraft": ">=1.18.2",

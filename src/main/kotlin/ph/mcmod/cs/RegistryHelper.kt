@@ -6,12 +6,18 @@ import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.block.Block
+import net.minecraft.block.FluidBlock
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityType
 import net.minecraft.fluid.Fluid
 import net.minecraft.item.*
+import net.minecraft.particle.ParticleEffect
+import net.minecraft.particle.ParticleType
+import net.minecraft.recipe.Recipe
+import net.minecraft.recipe.RecipeSerializer
+import net.minecraft.recipe.RecipeType
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerType
 import net.minecraft.tag.TagKey
@@ -48,7 +54,7 @@ open class RegistryHelper(val namespace: String, itemGroupIcon: (() -> ItemStack
                     arrpHelper.packBefore.addModel_block_cubeAll(block.id)
                     modeleds += block
                 }
-                if (block !in lootTableds) {
+                if (block !in lootTableds && block !is FluidBlock) {
                     arrpHelper.packBefore.addLootTable_itself(block)
                     lootTableds += block
                 }
@@ -81,10 +87,12 @@ open class RegistryHelper(val namespace: String, itemGroupIcon: (() -> ItemStack
         registeredItems += this
         return ph.mcmod.kum.register(this, Registry.ITEM, namespace, path)
     }
+    
     fun <T : Fluid> T.register(path: String): T {
         registeredFluids += this
         return ph.mcmod.kum.register(this, Registry.FLUID, namespace, path)
     }
+    
     fun <T : BlockItem> T.register(): T {
         registeredItems += this
         return ph.mcmod.kum.register(this)
@@ -101,6 +109,7 @@ open class RegistryHelper(val namespace: String, itemGroupIcon: (() -> ItemStack
         return ph.mcmod.kum.register(this, BuiltinRegistries.PLACED_FEATURE, id.namespace, id.path)
     }
     
+    fun <T : ParticleEffect, S : ParticleType<T>> S.register(path: String): S = ph.mcmod.kum.register(this, Registry.PARTICLE_TYPE, namespace, path)
     fun <T : BlockEntity> BlockEntityType<T>.register(path: String): BlockEntityType<T> = ph.mcmod.kum.register(this, Registry.BLOCK_ENTITY_TYPE, namespace, path)
     fun <E : Entity, T : EntityType<in E>> T.register(path: String): T = ph.mcmod.kum.register(this, Registry.ENTITY_TYPE, namespace, path)
     
@@ -129,6 +138,14 @@ open class RegistryHelper(val namespace: String, itemGroupIcon: (() -> ItemStack
         return this
     }
     
-    fun id(path:String):Identifier = Identifier(namespace, path)
+    fun id(path: String): Identifier = Identifier(namespace, path)
     fun ItemSettings(itemGroup: ItemGroup = this.itemGroup): FabricItemSettings = FabricItemSettings().group(itemGroup)
+    
+    fun <T : Recipe<*>> registerRecipeType(path: String, serializer: RecipeSerializer<T>): RecipeType<T> {
+        val id = id(path)
+        Registry.register(Registry.RECIPE_SERIALIZER, id, serializer)
+        return RecipeType.register(id.toString())
+    }
+    
+    fun newItemTag(path: String): TagKey<Item> = TagKey.of(Registry.ITEM_KEY, id(path))
 }

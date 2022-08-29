@@ -2,47 +2,82 @@
 
 package ph.mcmod.cs
 
+import com.nhoryzon.mc.farmersdelight.item.Foods
 import com.nhoryzon.mc.farmersdelight.registry.ItemsRegistry
+import com.simibubi.create.*
+import com.simibubi.create.api.behaviour.BlockSpoutingBehaviour
 import com.simibubi.create.content.logistics.block.mechanicalArm.ArmInteractionPointType
+import com.simibubi.create.foundation.networking.AllPackets
+import com.simibubi.create.foundation.networking.SimplePacketBase
+import me.pepperbell.simplenetworking.SimpleChannel
+import me.shedaniel.rei.api.client.plugins.REIClientPlugin
+import me.shedaniel.rei.api.client.registry.category.CategoryRegistry
+import me.shedaniel.rei.api.client.registry.display.DisplayRegistry
+import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry
+import me.shedaniel.rei.api.common.category.CategoryIdentifier
+import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry
+import me.shedaniel.rei.api.common.plugins.REIServerPlugin
+import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry
+import me.shedaniel.rei.api.common.util.EntryStacks
+import net.devtech.arrp.api.RuntimeResourcePack
 import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
 import net.fabricmc.fabric.api.`object`.builder.v1.block.entity.FabricBlockEntityTypeBuilder
+import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback
+import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings
+import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes
 import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.FullItemFluidStorage
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage
+import net.fabricmc.fabric.impl.tag.convention.TagRegistration
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.block.Blocks
 import net.minecraft.block.FluidBlock
 import net.minecraft.block.entity.BlockEntityType
+import net.minecraft.client.particle.WaterBubbleParticle
 import net.minecraft.command.argument.BlockPosArgumentType
 import net.minecraft.entity.effect.StatusEffectInstance
 import net.minecraft.entity.effect.StatusEffects
 import net.minecraft.fluid.Fluids
 import net.minecraft.item.*
+import net.minecraft.particle.DefaultParticleType
+import net.minecraft.recipe.CampfireCookingRecipe
+import net.minecraft.recipe.RecipeType
+import net.minecraft.screen.PlayerScreenHandler
 import net.minecraft.screen.ScreenHandlerType
 import net.minecraft.server.command.CommandManager
 import net.minecraft.tag.BlockTags
 import net.minecraft.tag.ItemTags
+import net.minecraft.tag.TagKey
 import net.minecraft.text.LiteralText
+import net.minecraft.text.TranslatableText
+import net.minecraft.util.Identifier
 import net.minecraft.util.math.Direction
+import net.minecraft.util.registry.Registry
+import org.jetbrains.annotations.ApiStatus
 import ph.mcmod.cs.MyRegistries.MyItems.MUSHROOM_SOUP
 import ph.mcmod.cs.MyRegistries.MyItems.WATER_BOWL
+import ph.mcmod.cs.api.printL
 import ph.mcmod.cs.fluid.AcidFluid
 import ph.mcmod.cs.fluid.TomatoSauceFluid
 import ph.mcmod.cs.game.*
 import ph.mcmod.cs.item.BowlFoodItem
 import ph.mcmod.cs.item.WaterBowlItem
-import ph.mcmod.kum.AxisArgumentType
-import ph.mcmod.kum.ItemStorable
+import ph.mcmod.cs.rei.BarbecueCampfireCatagory
+import ph.mcmod.cs.rei.BarbecueCampfireDisplay
+import ph.mcmod.cs.rei.BarbecueCatagory
+import ph.mcmod.cs.rei.BarbecueDisplay
+import ph.mcmod.kum.*
 import ph.mcmod.kum.arrp.addRecipe_craftingShaped
 import ph.mcmod.kum.arrp.addRecipe_craftingShapeless
-import ph.mcmod.kum.loadClass
 
 object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
+    
     object MyBlocks {
         val MUSHROOM_SOUP = FluidBlock(MyFluids.MUSHROOM_SOUP_STILL, FabricBlockSettings.copyOf(Blocks.WATER))
           .register("mushroom_soup")
@@ -50,6 +85,12 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
         val TOMATO_SAUCE = FluidBlock(MyFluids.TOMATO_SAUCE, FabricBlockSettings.copyOf(Blocks.WATER))
           .register("tomato_sauce")
           .lang("番茄酱")
+        val SUNFLOWER_OIL = FluidBlock(MyFluids.SUNFLOWER_OIL, FabricBlockSettings.copyOf(Blocks.WATER))
+          .register("sunflower_oil")
+          .lang("葵花籽油")
+        val COPPER_TUNNEL = CopperTunnelBlock(FabricBlockSettings.copyOf(Blocks.COPPER_BLOCK))
+          .register("copper_tunnel")
+          .lang("铜隧道")
         //以下都是旧项目的，以后要删掉
         @JvmField
         val VERY_LARGE_BARREL = VeryLargeBarrel.TBlock(FabricBlockSettings.copyOf(Blocks.BARREL)
@@ -95,8 +136,8 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
     }
     
     object MyBlockEntityTypes {
-//        @JvmField
-//        val SHAFT: BlockEntityType<ShaftBlockEntity> = FabricBlockEntityTypeBuilder.create(::ShaftBlockEntity).addBlock(AllBlocks.SHAFT.get()).build().register("shaft")
+        @JvmField
+        val COPPER_TUNNEL: BlockEntityType<CopperTunnelBlockEntity> = FabricBlockEntityTypeBuilder.create(::CopperTunnelBlockEntity).addBlock(MyBlocks.COPPER_TUNNEL).build().register("copper_tunnel")
         
         //以下都是旧项目的，以后要删掉
         @JvmField
@@ -112,6 +153,16 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
     }
     
     object MyItems {
+        @JvmField
+        val COPPER_TUNNEL = BlockItem(MyBlocks.COPPER_TUNNEL, ItemSettings()).register()
+        
+        val RAW_CHICKEN_STICK = Item(ItemSettings().food(Foods.CHICKEN_CUTS.get()))
+          .register("raw_chicken_stick")
+          .lang("生鸡肉串")
+        val CHICKEN_STICK = Item(ItemSettings().food(MyFoodComponents.CHICKEN_STICK))
+          .register("chicken_stick")
+          .lang("熟鸡肉串")
+        
         val WATER_BOWL = WaterBowlItem(ItemSettings())
           .register("water_bowl")
           .lang("碗装水")
@@ -127,9 +178,6 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
         val CHOPPED_BROWN_MUSHROOM = Item(ItemSettings().food(MyFoodComponents.CHOPPED_MUSHROOM))
           .register("chopped_brown_mushroom")
           .lang("切好的棕蘑菇")
-        val MUSHROOM_SOUP_BUCKET = BucketItem(MyFluids.MUSHROOM_SOUP_STILL, ItemSettings().maxCount(1))
-          .register("mushroom_soup_bucket")
-          .lang("蘑菇汤桶")
         val MUSHROOM_SOUP = BowlFoodItem(ItemSettings().food(MyFoodComponents.MUSHROOM_SOUP))
           .register("mushroom_soup")
           .lang("碗装蘑菇汤")
@@ -151,12 +199,16 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
         val TOMATO_SAUCE_BUCKET = BucketItem(MyFluids.TOMATO_SAUCE, ItemSettings().maxCount(1))
           .register("tomato_sauce_bucket")
           .lang("番茄酱桶")
-    
-    
-    
+        val MUSHROOM_SOUP_BUCKET = BucketItem(MyFluids.MUSHROOM_SOUP_STILL, ItemSettings().maxCount(1))
+          .register("mushroom_soup_bucket")
+          .lang("蘑菇汤桶")
+        val SUNFLOWER_OIL_BUCKET = BucketItem(MyFluids.SUNFLOWER_OIL, ItemSettings().maxCount(1))
+          .register("sunflower_oil_bucket")
+          .lang("葵花籽油桶")
+        
         //以下都是旧项目的，以后要删掉
         @JvmField
-        val VAULT = VeryLargeBarrel.TItem(MyBlocks.VERY_LARGE_BARREL,FabricItemSettings()).register()
+        val VAULT = VeryLargeBarrel.TItem(MyBlocks.VERY_LARGE_BARREL, FabricItemSettings()).register()
         @JvmField
         val ITEM_REDIRECTOR = DescriptedBlockItem(MyBlocks.ITEM_REDIRECTOR, FabricItemSettings()).register()
         @JvmField
@@ -177,12 +229,19 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
         val MUSHROOM_SOUP_FLOWING = AcidFluid.Flowing().register("mushroom_soup_flowing")
         val TOMATO_SAUCE = TomatoSauceFluid.Still().register("tomato_sauce")
         val TOMATO_SAUCE_FLOWING = TomatoSauceFluid.Flowing().register("tomato_sauce_flowing")
+        val SUNFLOWER_OIL = SunflowerOilFluid.Still()
+          .register("sunflower_oil")
+          .lang("葵花籽油")
+        val SUNFLOWER_OIL_FLOWING = SunflowerOilFluid.Flowing().register("sunflower_oil_flowing")
+        
     }
     
     object MyBlockTags {
     }
     
     object MyItemTags {
+        val DOUGHS: TagKey<Item> = TagRegistration.ITEM_TAG_REGISTRATION.registerCommon("doughs")
+        val ANGLE_ON_DRAIN = newItemTag("angle_on_drain")
     }
     
     object MyScreenHandlerTypes {
@@ -193,6 +252,12 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
     }
     
     object MyFoodComponents {
+        val CHICKEN_STICK: FoodComponent = FoodComponent.Builder()
+          .hunger(1)
+          .saturationModifier(0.5f)
+          .statusEffect(StatusEffectInstance(StatusEffects.SATURATION, 1, 6), 1f)
+          .build()
+        
         val CHOPPING_MUSHROOM: FoodComponent = FoodComponent.Builder().hunger(1).saturationModifier(0.5f).build()
         val CHOPPED_MUSHROOM: FoodComponent = FoodComponent.Builder().hunger(1).saturationModifier(0.5f).snack().build()
         val MUSHROOM_SOUP: FoodComponent = FoodComponent.Builder().hunger(6).saturationModifier(0.5f).build()
@@ -201,11 +266,95 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
         val BAKED_MUSHROOM: FoodComponent = FoodComponent.Builder().hunger(1).saturationModifier(2f).snack().build()
     }
     
+    object MyParticles {
+        val OIL_BUBBLE: DefaultParticleType = FabricParticleTypes.simple().register("oil_bubble")
+    }
+    
+    object MyPackets {
+        val CHANNEL_NAME = id("main")
+        val COPPER_TUNNEL_FLAP = MyLoadedPacket(CopperTunnelFlapPacket::class.java, ::CopperTunnelFlapPacket, SimplePacketBase.NetworkDirection.PLAY_TO_CLIENT)
+        
+        init {
+            AllPackets.channel = SimpleChannel(AllPackets.CHANNEL_NAME)
+            var id = 0
+            for (packet in arrayOf(COPPER_TUNNEL_FLAP)) {
+                var registered = false
+                if (packet.direction == SimplePacketBase.NetworkDirection.PLAY_TO_SERVER) {
+                    AllPackets.channel.registerC2SPacket(packet.type, id++)
+                    registered = true
+                }
+                if (packet.direction == SimplePacketBase.NetworkDirection.PLAY_TO_CLIENT) {
+                    AllPackets.channel.registerS2CPacket(packet.type, id++)
+                    registered = true
+                }
+                if (!registered) {
+                    Create.LOGGER.error("Could not register packet with type " + packet.type)
+                }
+            }
+        }
+    }
+    
+    object MyRecipeTypes {
+        val STEAMING = registerRecipeType("steaming", SteamingRecipe.Serializer)
+        val BARBECUE = registerRecipeType("barbecue", BarbecueRecipe.Serializer)
+    }
+    
+    object REIClient : REIClientPlugin {
+        val BARBECUE: CategoryIdentifier<BarbecueDisplay> = CategoryIdentifier.of(MyRecipeTypes.BARBECUE.toString())
+        val BARBECUE_TITLE = TranslatableText("category.${BARBECUE.namespace}.${BARBECUE.path}")
+        val BARBECUE_CAMPFIRE: CategoryIdentifier<BarbecueDisplay> = CategoryIdentifier.of(id("barbecue_campfire"))
+        val BARBECUE_CAMPFIRE_TITLE = TranslatableText("category.${BARBECUE_CAMPFIRE.namespace}.${BARBECUE_CAMPFIRE.path}")
+        
+        init {
+            arrpHelper.getLang()
+              .entry(BARBECUE_TITLE.key, "烧烤")
+            arrpHelper.getLang("en_us")
+              .entry(BARBECUE_TITLE.key, "Barbecue")
+            arrpHelper.getLang()
+              .entry(BARBECUE_CAMPFIRE_TITLE.key, "烧烤（营火烹饪）")
+            arrpHelper.getLang("en_us")
+              .entry(BARBECUE_CAMPFIRE_TITLE.key, "Barbecue (Campfire Cooking)")
+        }
+        
+        override fun getPluginProviderName(): String {
+            return id("rei_client").toString()
+        }
+        
+        override fun registerCategories(registry: CategoryRegistry) {
+            registry.add(BarbecueCatagory)
+            registry.addWorkstations(BarbecueCatagory.categoryIdentifier, EntryStacks.of(AllBlocks.ITEM_DRAIN.get()), EntryStacks.of(Fluids.LAVA))
+            registry.add(BarbecueCampfireCatagory)
+            registry.addWorkstations(BarbecueCampfireCatagory.categoryIdentifier, EntryStacks.of(AllBlocks.ITEM_DRAIN.get()), EntryStacks.of(Fluids.LAVA))
+        }
+        
+        override fun registerScreens(registry: ScreenRegistry) {
+//            registry.registerContainerClickArea(Rectangle(78, 32, 28, 23), BlastFurnaceScreen::class.java, TOASTING)
+        }
+        
+        override fun registerDisplays(registry: DisplayRegistry) {
+            registry.registerRecipeFiller(BarbecueRecipe::class.java, MyRecipeTypes.BARBECUE, ::BarbecueDisplay)
+            registry.registerRecipeFiller(CampfireCookingRecipe::class.java, RecipeType.CAMPFIRE_COOKING, ::BarbecueCampfireDisplay)
+        }
+    }
+    
+    object MyREIServerPlugin : REIServerPlugin {
+        override fun registerDisplaySerializer(registry: DisplaySerializerRegistry) {
+            registry.register(REIClient.BARBECUE, BarbecueDisplay.serializer(::BarbecueDisplay))
+            registry.register(REIClient.BARBECUE_CAMPFIRE, BarbecueDisplay.serializer(::BarbecueCampfireDisplay))
+            
+        }
+        
+        override fun registerMenuInfo(registry: MenuInfoRegistry) {
+        
+        }
+    }
+    
     init {
         MyBlocks.loadClass()
         MyItems.loadClass()
         MyBlockEntityTypes.loadClass()
         MyScreenHandlerTypes.loadClass()
+        MyRecipeTypes.loadClass()
         arrpHelper.packAfter.addRecipe_craftingShaped(MyItems.VAULT)("#", "@", "#")("#", ItemTags.WOODEN_SLABS)("@", Items.BARREL)()
         arrpHelper.packAfter.addRecipe_craftingShapeless(MyItems.ITEM_REDIRECTOR, 1, Items.DROPPER, ConventionalItemTags.COPPER_INGOTS, Items.AMETHYST_SHARD)
         arrpHelper.packAfter.addRecipe_craftingShapeless(MyItems.FLUID_REDIRECTOR, 1, Items.DROPPER, ConventionalItemTags.COPPER_INGOTS, Items.AMETHYST_SHARD, Items.GLASS_PANE)
@@ -244,6 +393,72 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
                         }))))
             }
         }
+        BlockSpoutingBehaviour.addCustomSpoutInteraction(id("depot"), SpoutingOil())
+        arrpHelper.getLang()
+          .entry("$namespace.ponder.item_drain_barbecue.header", "使用分液池烧烤")
+          .entry("$namespace.ponder.item_drain_barbecue.text_1", "装有高温液体的分液池可以烧烤")
+          .entry("$namespace.ponder.item_drain_barbecue.text_2", "液体越多，烧烤越快，1.5桶液体的速度是1桶的5倍")
+          .entry("$namespace.ponder.item_drain_barbecue.text_3", "物品越多，烧烤越慢，1个物品的速度是64个物品的4倍")
+        
+        Create.registrate()
+          .addRegisterCallback(Registry.BLOCK.key) {
+              AllMovementBehaviours.registerBehaviour(AllBlocks.DEPOT.get(), DepotMovementBehaviour)
+          }
+          .addRegisterCallback(Registry.ITEM.key) {
+          
+          }
+        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register { server, resourceManager, success ->
+//            server.recipeManager.setRecipes(server.recipeManager.values().apply {
+//                addAll(arrayOf(
+//                  BarbecueRecipe(MyItems.CHICKEN_STICK.id.pre("barbecue/"), Ingredient.ofItems(MyItems.RAW_CHICKEN_STICK), ItemVariant.of(MyItems.CHICKEN_STICK), 100.0)
+//                ))
+//            })
+        }
+        arrpHelper.getTag(AllTags.AllItemTags.UPRIGHT_ON_BELT.tag)
+          .add(Items.BOWL)
+        arrpHelper.getTag(MyItemTags.DOUGHS)
+          .add(AllItems.DOUGH.id)
+        arrpHelper.getTag(MyItemTags.ANGLE_ON_DRAIN)
+          .add(Items.STICK)
+          .add(Items.BLAZE_ROD)
+          .add(MyItems.RAW_CHICKEN_STICK)
+          .add(MyItems.CHICKEN_STICK)
+        arrpHelper.packAfter.addRecipe_barbecue(MyItems.RAW_CHICKEN_STICK, MyItems.CHICKEN_STICK)
+        runAtClient {
+            ClientSpriteRegistryCallback.event(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE).register { atlasTexture, registry ->
+                registry.register(id("particle/oil_bubble"))
+            }
+            ParticleFactoryRegistry.getInstance().register(MyParticles.OIL_BUBBLE, WaterBubbleParticle::Factory)
+        }
     }
+    @JvmStatic
+    @ApiStatus.Internal
+    fun afterFDInit() {
+        arrpHelper.getTag(AllTags.AllItemTags.UPRIGHT_ON_BELT.tag)
+          .add(ItemsRegistry.FRUIT_SALAD.get())
+        arrpHelper.getTag(MyItemTags.DOUGHS)
+          .add(ItemsRegistry.WHEAT_DOUGH.get())
+        arrpHelper.getTag(MyItemTags.ANGLE_ON_DRAIN)
+          .add(ItemsRegistry.BARBECUE_STICK.get())
+        arrpHelper.packAfter.addRecipe_craftingShapeless(MyItems.CHICKEN_STICK, 1, Items.STICK, ItemsRegistry.CHICKEN_CUTS.get())
+    }
+    
+    fun RuntimeResourcePack.addRecipe_barbecue(ingredient: Identifiable, result: Identifiable) = addRecipe_barbecue(ingredient, result, recipeId = id(ingredient.id.path).pre("barbecue/"))
+    
 }
 
+fun RuntimeResourcePack.addRecipe_barbecue(ingredient: Identifiable, result: Identifiable, duration: Double = SingleRecipe.DEFUALT_DURATION, recipeId: Identifier = result.id.pre("barbecue/")): ByteArray {
+    val isTag = ingredient is TagKey<*>
+    return addData(recipeId.preRecipes().json(), """
+        {
+          "type": "c_storage:barbecue",
+          "ingredient": {
+            "${if (isTag) "tag" else "item"}": "${ingredient.id}"
+          },
+          "result": {
+            "id": "${result.id}"
+          },
+          "duration": $duration
+        }
+    """.trimIndent().printL().toByteArray())
+}
