@@ -52,6 +52,12 @@ interface InjectItemDrainTileEntity {
                 orCreateNbt.putOrRemove("toastingDuration", value, NbtCompound::putDouble)
                 removeNbtIfEmpty()
             }
+        var ItemStack.steamingDuration: Double?
+            get() = nbt?.getOrNull("steamingDuration", NbtCompound::getDouble)
+            set(value) {
+                orCreateNbt.putOrRemove("steamingDuration", value, NbtCompound::putDouble)
+                removeNbtIfEmpty()
+            }
         
         fun <T : Recipe<Inventory>> getRecipe(world: World, recipeManager: RecipeManager, ingredient: ItemStack, recipeType: RecipeType<T>): T? {
             return recipeManager.getFirstMatch(recipeType, SimpleInventory(1).apply { setStack(0, ingredient) }, world).orElse(null)
@@ -75,7 +81,7 @@ interface InjectItemDrainTileEntity {
                 val temperature = FluidVariantAttributes.getTemperature(fluidVariant)
                 if (temperature >= LOWEST_TEMPERATURE) {
                     toaster(world, fluidVariant, amount, random, chance, blockPos, temperature)
-                } else if (fluidVariant.isOf(Fluids.WATER) && world.getBlockState(blockPos.down()).isOf(AllBlocks.LIT_BLAZE_BURNER.get())) {
+                } else if (fluidVariant.isOf(Fluids.WATER) && world.getBlockState(blockPos.down()).isOf(AllBlocks.LIT_BLAZE_BURNER.get()) && world.getBlockState(blockPos.up()).run { isOf(MyRegistries.MyBlocks.COPPER_TUNNEL) && CopperTunnelBlock.OPEN_STATES.values.fold(true) { b, property -> b && get(property) != CopperTunnelBlock.OpenState.NONE } }) {
                     steamer(world, fluidVariant, amount, random, chance, blockPos, temperature)
                 }
             }
@@ -127,28 +133,25 @@ interface InjectItemDrainTileEntity {
             switch2(te, heldItem0, { world, fluidVariant, amount, random, chance, blockPos, temperature, heldItem, heldItemStack, recipe ->
                 val duration = heldItemStack.toastingDuration ?: recipe.duration
                 if (duration > 0) {
-                    val a = 4.3322725541611750040909696772139
-                    val b = 0.50987589830933713890560128694813
-                    val c = 0.87746897457733428472640032173703
-                    val heat = (temperature.toDouble() - LOWEST_TEMPERATURE) / (LAVA_TEMPERATURE - LOWEST_TEMPERATURE) *
-                      when (val x = amount.toDouble() / FluidConstants.BUCKET) {
-                          in 0.0..1.0 -> x
-                          else -> a * (x - b).pow(5) + c
-                      }//.printS()
-                    val cargo = heldItemStack.count.toDouble().pow(-1 / 3.0)
-                    heldItemStack.toastingDuration = (duration - cargo * heat)
+                    val c1 = 4.332272554161175
+                    val x2 = 0.5098758983093371
+                    val c3 = 0.8774689745773343
+                    val temperatureMultiplier =  (temperature.toDouble() - LOWEST_TEMPERATURE) / (LAVA_TEMPERATURE - LOWEST_TEMPERATURE)
+                    val fluidAmountMultiplier = when (val x = amount.toDouble() / FluidConstants.BUCKET) {
+                        in 0.0..1.0 -> x
+                        else -> c1 * (x - x2).pow(5) + c3
+                    }
+                    val itemCountMultiplier = heldItemStack.count.toDouble().pow(-1 / 3.0)
+                    val step = temperatureMultiplier*fluidAmountMultiplier*itemCountMultiplier
+                    heldItemStack.toastingDuration = (duration - step)
                     cir.returnValue = true
                     heldItem.beltPosition = 0.5f
                     heldItem.prevBeltPosition = 0.5f
                     processingTicks.element = 20
-                    
-                    val insertedFrom: Direction = heldItem.insertedFrom
-                    var sideOffset = heldItem.sideOffset.toDouble()
-                    val alongX = insertedFrom.rotateYClockwise().axis === Direction.Axis.X
-                    if (!alongX) sideOffset *= -1
-                    val pos = blockPos.toCenter().add(if (alongX) sideOffset else 0.0, 0.32, if (alongX) 0.0 else sideOffset) + (Vec3d.of(heldItem.insertedFrom.opposite.vector) * (0.5 - heldItem.beltPosition))
-                    for (i in 0 until heat.random().toInt()) {
-                        if (random.nextInt(5) == 0) {
+    
+                    val pos = getPos(blockPos, heldItem)
+                    for (i in 0 until step.random().toInt()) {
+                        if (random.nextInt(10) == 0) {
                             if (world is ServerWorld) {
                                 world.spreadParticles(ParticleTypes.POOF, false, pos, Vec3d.ZERO, 0.0, 1)
                                 world.spreadParticles(ParticleTypes.SMOKE, false, pos, Vec3d.ZERO, 0.0, 1)
@@ -156,10 +159,9 @@ interface InjectItemDrainTileEntity {
                                 world.addParticle(ParticleTypes.POOF, pos.z, pos.y, pos.z, 0.0, 0.0, 0.0)
                                 world.addParticle(ParticleTypes.SMOKE, pos.z, pos.y, pos.z, 0.0, 0.0, 0.0)
                             }
-//                            world.addParticles(ParticleTypes.POOF, false, pos, Vec3d.ZERO, 0.01, 1)
-//                            world.addParticles(ParticleTypes.SMOKE, false, pos, Vec3d.ZERO, 0.01, 1)
-                            
-                            world.playSound(null, pos.x, pos.y, pos.z, SoundEvents.BLOCK_CAMPFIRE_CRACKLE, SoundCategory.BLOCKS, 1f, 1f)
+                            if (random.nextInt(5) == 0) {
+                                world.playSound(null, pos.x, pos.y, pos.z, SoundEvents.BLOCK_CAMPFIRE_CRACKLE, SoundCategory.BLOCKS, 1f, 1f)
+                            }
                         }
                     }
                     if (duration / recipe.duration <= 0.5 && te.toastingStage < 6) {
@@ -170,10 +172,37 @@ interface InjectItemDrainTileEntity {
                     heldItem.stack = recipe.output.copy().apply { count = heldItemStack.count }
                 }
             }, { world, fluidVariant, amount, random, chance, blockPos, temperature, heldItem, heldItemStack, recipe ->
-                //TODO 蒸
+                val duration = heldItemStack.steamingDuration ?: recipe.duration
+                if (duration > 0) {
+                    val step = heldItemStack.count.toDouble().pow(-1 / 3.0)
+                    heldItemStack.steamingDuration = duration - step
+                    cir.returnValue = true
+                    heldItem.beltPosition = 0.5f
+                    heldItem.prevBeltPosition = 0.5f
+                    processingTicks.element = 20
+    
+                    val pos = getPos(blockPos, heldItem)
+                    for (i in 0 until step.random().toInt()) {
+                        if (random.nextInt(20) == 0) {
+                            if (world is ServerWorld) {
+                                world.spreadParticles(ParticleTypes.POOF, false, pos, Vec3d.ZERO, 0.0, 1)
+                            } else if (world is PonderWorld) {
+                                world.addParticle(ParticleTypes.POOF, pos.z, pos.y, pos.z, 0.0, 0.0, 0.0)
+                            }
+                        }
+                    }
+                } else {
+                    heldItem.stack = recipe.output.copy().apply { count = heldItemStack.count }
+                }
             })
         }
-        
+        fun getPos(blockPos: BlockPos, heldItem: TransportedItemStack): Vec3d {
+            val insertedFrom = heldItem.insertedFrom
+            var sideOffset = heldItem.sideOffset.toDouble()
+            val alongX = insertedFrom.rotateYClockwise().axis === Direction.Axis.X
+            if (!alongX) sideOffset *= -1
+            return blockPos.toCenter().add(if (alongX) sideOffset else 0.0, 0.32, if (alongX) 0.0 else sideOffset) + (Vec3d.of(heldItem.insertedFrom.opposite.vector) * (0.5 - heldItem.beltPosition))
+        }
         @JvmStatic
         fun enableProcessing(te: ItemDrainTileEntity, world0: World, heldItemStack0: ItemStack, heldItem0: TransportedItemStack?): Boolean {
             te as InjectItemDrainTileEntity
@@ -182,8 +211,7 @@ interface InjectItemDrainTileEntity {
                 return true
             }
             switch2(te, heldItem0, { world, fluidVariant, amount, random, chance, blockPos, temperature, heldItem, heldItemStack, recipe ->
-                if (te.toastingStage == 0)
-                    te.toastingStage = 1
+                if (te.toastingStage == 0) te.toastingStage = 1
                 return true
             }, { world, fluidVariant, amount, random, chance, blockPos, temperature, heldItem, heldItemStack, recipe ->
                 return true

@@ -74,10 +74,10 @@ dependencies {
     //my dependencies
     val arrpVersion: String by project
     modImplementation("net.devtech", "arrp", arrpVersion)
-    modImplementation(include("ph.mcmod", "KotlinUtilMinecraft", "+"))
+    modImplementation(include("ph.mcmod", "KotlinUtilMinecraft", "0.8.2"))
     modImplementation("dev.emi:trinkets:3.3.1")
     modRuntimeOnly("appeng:appliedenergistics2-fabric:11.1.3")//AE2
-    modImplementation("com.nhoryzon.mc:farmers-delight-fabric:+")
+    modImplementation("com.nhoryzon.mc:farmers-delight-fabric:1.18.2-0.2.1")
     
     // create dev environment
     modLocalRuntime("maven.modrinth:lazydfu:0.1.2") // lazydfu - improves start times
@@ -120,6 +120,8 @@ dependencies {
 //    modImplementation("io.github.tropheusj:milk-lib:${milk_lib_version}")
 //    val jsr305_version: String by project
 //    implementation("com.google.code.findbugs:jsr305:${jsr305_version}")
+    
+//    modImplementation("com.terraformersmc:modmenu:3.2.3")
 }
 tasks {
     val javaVersion = JavaVersion.VERSION_17
