@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import ph.mcmod.cs.game.InjectSpoutTileEntity;
-@Mixin(SpoutTileEntity.class)
+@Mixin(value = SpoutTileEntity.class,remap = false)
 public abstract class MixinSpoutTileEntity extends SmartTileEntity implements InjectSpoutTileEntity {
     private boolean shouldParticle;
 

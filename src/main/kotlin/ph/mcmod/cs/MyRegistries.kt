@@ -161,6 +161,9 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
         val CHICKEN_STICK = Item(ItemSettings().food(MyFoodComponents.CHICKEN_STICK))
           .register("chicken_stick")
           .lang("熟鸡肉串")
+        val STEAMED_BUNS = Item(ItemSettings().food(MyFoodComponents.STEAMED_BUNS))
+          .register("steamed_buns")
+          .lang("馒头")
         
         val WATER_BOWL = WaterBowlItem(ItemSettings())
           .register("water_bowl")
@@ -256,6 +259,11 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
           .saturationModifier(0.5f)
           .statusEffect(StatusEffectInstance(StatusEffects.SATURATION, 1, 6), 1f)
           .build()
+        val STEAMED_BUNS: FoodComponent = FoodComponent.Builder()
+          .hunger(1)
+          .saturationModifier(0.5f)
+          .statusEffect(StatusEffectInstance(StatusEffects.SATURATION, 1, 7), 1f)
+          .build()
         
         val CHOPPING_MUSHROOM: FoodComponent = FoodComponent.Builder().hunger(1).saturationModifier(0.5f).build()
         val CHOPPED_MUSHROOM: FoodComponent = FoodComponent.Builder().hunger(1).saturationModifier(0.5f).snack().build()
@@ -270,7 +278,7 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
     }
     
     object MyPackets {
-//        val CHANNEL_NAME = id("main")
+        //        val CHANNEL_NAME = id("main")
 //        val CHANNEL = SimpleChannel(CHANNEL_NAME)
         val COPPER_TUNNEL_FLAP = MyLoadedPacket(CopperTunnelFlapPacket::class.java, ::CopperTunnelFlapPacket, SimplePacketBase.NetworkDirection.PLAY_TO_CLIENT)
         
@@ -297,56 +305,56 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
         val STEAMING = registerRecipeType("steaming", SteamingRecipe.Serializer)
         val BARBECUE = registerRecipeType("barbecue", BarbecueRecipe.Serializer)
     }
-    
-    object REIClient : REIClientPlugin {
-        val BARBECUE: CategoryIdentifier<BarbecueDisplay> = CategoryIdentifier.of(MyRecipeTypes.BARBECUE.toString())
-        val BARBECUE_TITLE = TranslatableText("category.${BARBECUE.namespace}.${BARBECUE.path}")
-        val BARBECUE_CAMPFIRE: CategoryIdentifier<BarbecueDisplay> = CategoryIdentifier.of(id("barbecue_campfire"))
-        val BARBECUE_CAMPFIRE_TITLE = TranslatableText("category.${BARBECUE_CAMPFIRE.namespace}.${BARBECUE_CAMPFIRE.path}")
-        
-        init {
-            arrpHelper.getLang()
-              .entry(BARBECUE_TITLE.key, "烧烤")
-            arrpHelper.getLang("en_us")
-              .entry(BARBECUE_TITLE.key, "Barbecue")
-            arrpHelper.getLang()
-              .entry(BARBECUE_CAMPFIRE_TITLE.key, "烧烤（营火烹饪）")
-            arrpHelper.getLang("en_us")
-              .entry(BARBECUE_CAMPFIRE_TITLE.key, "Barbecue (Campfire Cooking)")
-        }
-        
-        override fun getPluginProviderName(): String {
-            return id("rei_client").toString()
-        }
-        
-        override fun registerCategories(registry: CategoryRegistry) {
-            registry.add(BarbecueCatagory)
-            registry.addWorkstations(BarbecueCatagory.categoryIdentifier, EntryStacks.of(AllBlocks.ITEM_DRAIN.get()), EntryStacks.of(Fluids.LAVA))
-            registry.add(BarbecueCampfireCatagory)
-            registry.addWorkstations(BarbecueCampfireCatagory.categoryIdentifier, EntryStacks.of(AllBlocks.ITEM_DRAIN.get()), EntryStacks.of(Fluids.LAVA))
-        }
-        
-        override fun registerScreens(registry: ScreenRegistry) {
-//            registry.registerContainerClickArea(Rectangle(78, 32, 28, 23), BlastFurnaceScreen::class.java, TOASTING)
-        }
-        
-        override fun registerDisplays(registry: DisplayRegistry) {
-            registry.registerRecipeFiller(BarbecueRecipe::class.java, MyRecipeTypes.BARBECUE, ::BarbecueDisplay)
-            registry.registerRecipeFiller(CampfireCookingRecipe::class.java, RecipeType.CAMPFIRE_COOKING, ::BarbecueCampfireDisplay)
-        }
-    }
-    
-    object MyREIServerPlugin : REIServerPlugin {
-        override fun registerDisplaySerializer(registry: DisplaySerializerRegistry) {
-            registry.register(REIClient.BARBECUE, BarbecueDisplay.serializer(::BarbecueDisplay))
-            registry.register(REIClient.BARBECUE_CAMPFIRE, BarbecueDisplay.serializer(::BarbecueCampfireDisplay))
-            
-        }
-        
-        override fun registerMenuInfo(registry: MenuInfoRegistry) {
-        
-        }
-    }
+
+//    object REIClient : REIClientPlugin {
+//            val BARBECUE: CategoryIdentifier<BarbecueDisplay> = CategoryIdentifier.of(MyRecipeTypes.BARBECUE.toString())
+//            val BARBECUE_TITLE = TranslatableText("category.${BARBECUE.namespace}.${BARBECUE.path}")
+//            val BARBECUE_CAMPFIRE: CategoryIdentifier<BarbecueDisplay> = CategoryIdentifier.of(id("barbecue_campfire"))
+//            val BARBECUE_CAMPFIRE_TITLE = TranslatableText("category.${BARBECUE_CAMPFIRE.namespace}.${BARBECUE_CAMPFIRE.path}")
+//
+//            init {
+//                arrpHelper.getLang()
+//                  .entry(BARBECUE_TITLE.key, "烧烤")
+//                arrpHelper.getLang("en_us")
+//                  .entry(BARBECUE_TITLE.key, "Barbecue")
+//                arrpHelper.getLang()
+//                  .entry(BARBECUE_CAMPFIRE_TITLE.key, "烧烤（营火烹饪）")
+//                arrpHelper.getLang("en_us")
+//                  .entry(BARBECUE_CAMPFIRE_TITLE.key, "Barbecue (Campfire Cooking)")
+//            }
+//
+//            override fun getPluginProviderName(): String {
+//                return id("rei_client").toString()
+//            }
+//
+//            override fun registerCategories(registry: CategoryRegistry) {
+//                registry.add(BarbecueCatagory)
+//                registry.addWorkstations(BarbecueCatagory.categoryIdentifier, EntryStacks.of(AllBlocks.ITEM_DRAIN.get()), EntryStacks.of(Fluids.LAVA))
+//                registry.add(BarbecueCampfireCatagory)
+//                registry.addWorkstations(BarbecueCampfireCatagory.categoryIdentifier, EntryStacks.of(AllBlocks.ITEM_DRAIN.get()), EntryStacks.of(Fluids.LAVA))
+//            }
+//
+//            override fun registerScreens(registry: ScreenRegistry) {
+//    //            registry.registerContainerClickArea(Rectangle(78, 32, 28, 23), BlastFurnaceScreen::class.java, TOASTING)
+//            }
+//
+//            override fun registerDisplays(registry: DisplayRegistry) {
+//                registry.registerRecipeFiller(BarbecueRecipe::class.java, MyRecipeTypes.BARBECUE, ::BarbecueDisplay)
+//                registry.registerRecipeFiller(CampfireCookingRecipe::class.java, RecipeType.CAMPFIRE_COOKING, ::BarbecueCampfireDisplay)
+//            }
+//    }
+//
+//    object MyREIServerPlugin : REIServerPlugin {
+//        override fun registerDisplaySerializer(registry: DisplaySerializerRegistry) {
+//            registry.register(REIClient.BARBECUE, BarbecueDisplay.serializer(::BarbecueDisplay))
+//            registry.register(REIClient.BARBECUE_CAMPFIRE, BarbecueDisplay.serializer(::BarbecueCampfireDisplay))
+//
+//        }
+//
+//        override fun registerMenuInfo(registry: MenuInfoRegistry) {
+//
+//        }
+//    }
     
     init {
         MyBlocks.loadClass()
@@ -423,11 +431,13 @@ object MyRegistries : RegistryHelper(MOD_ID, { MyItems.VAULT.defaultStack }) {
           .add(MyItems.RAW_CHICKEN_STICK)
           .add(MyItems.CHICKEN_STICK)
         arrpHelper.packAfter.addRecipe_barbecue(MyItems.RAW_CHICKEN_STICK, MyItems.CHICKEN_STICK)
+        arrpHelper.packAfter.addRecipe_steaming(MyItemTags.DOUGHS, MyItems.STEAMED_BUNS)
         runAtClient {
             ClientSpriteRegistryCallback.event(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE).register { atlasTexture, registry ->
                 registry.register(id("particle/oil_bubble"))
             }
             ParticleFactoryRegistry.getInstance().register(MyParticles.OIL_BUBBLE, WaterBubbleParticle::Factory)
+            
         }
     }
     @JvmStatic
@@ -451,6 +461,22 @@ fun RuntimeResourcePack.addRecipe_barbecue(ingredient: Identifiable, result: Ide
     return addData(recipeId.preRecipes().json(), """
         {
           "type": "c_storage:barbecue",
+          "ingredient": {
+            "${if (isTag) "tag" else "item"}": "${ingredient.id}"
+          },
+          "result": {
+            "id": "${result.id}"
+          },
+          "duration": $duration
+        }
+    """.trimIndent().printL().toByteArray())
+}
+
+fun RuntimeResourcePack.addRecipe_steaming(ingredient: Identifiable, result: Identifiable, duration: Double = SingleRecipe.DEFUALT_DURATION, recipeId: Identifier = result.id.pre("steaming/")): ByteArray {
+    val isTag = ingredient is TagKey<*>
+    return addData(recipeId.preRecipes().json(), """
+        {
+          "type": "c_storage:steaming",
           "ingredient": {
             "${if (isTag) "tag" else "item"}": "${ingredient.id}"
           },

@@ -2,6 +2,11 @@
 
 package ph.mcmod.cs
 
+import com.simibubi.create.AllBlocks
+import com.simibubi.create.AllItems
+import net.devtech.arrp.json.loot.JCondition
+import net.devtech.arrp.json.models.JModel
+import net.devtech.arrp.json.models.JOverride
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry
 import net.fabricmc.fabric.api.client.render.fluid.v1.SimpleFluidRenderHandler
@@ -12,6 +17,8 @@ import ph.mcmod.cs.game.CopperTunnelRenderer
 import ph.mcmod.cs.game.ItemQueueScreen
 import ph.mcmod.cs.game.ItemStackScreen
 import ph.mcmod.cs.game.ItemStorageScreen
+import ph.mcmod.kum.preBlock
+import ph.mcmod.kum.preItem
 
 object ClientMain {
     @JvmStatic
@@ -28,5 +35,11 @@ object ClientMain {
         
         BlockEntityRendererRegistry.register(MyRegistries.MyBlockEntityTypes.COPPER_TUNNEL, ::CopperTunnelRenderer)
         BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), MyRegistries.MyBlocks.COPPER_TUNNEL)
+        
+        
+        MyRegistries.arrpHelper.packAfter.addModel(JModel.model(AllBlocks.ITEM_DRAIN.id.preBlock())
+          .addOverride(JOverride(JCondition().parameter("custom_model_data",1),"$MOD_ID:item/item_drain_water"))
+          .addOverride(JOverride(JCondition().parameter("custom_model_data",2),"$MOD_ID:item/item_drain_lava"))
+          , AllBlocks.ITEM_DRAIN.id.preItem())
     }
 }

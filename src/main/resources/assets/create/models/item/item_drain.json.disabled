@@ -1,0 +1,7 @@
+{
+  "parent": "create:item/item_drain",
+  "overrides": [
+    {"predicate": {"custom_model_data": 1}, "model": "c_storage:item/item_drain_water"},
+    {"predicate": {"custom_model_data": 2}, "model": "c_storage:item/item_drain_lava"}
+  ]
+}

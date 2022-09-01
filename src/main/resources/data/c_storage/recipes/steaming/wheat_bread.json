@@ -1,9 +1,0 @@
-{
-  "type": "c_storage:steaming",
-  "ingredient": {
-    "tag": "c:doughs"
-  },
-  "result": {
-    "id": "bread"
-  }
-}

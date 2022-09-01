@@ -19,13 +19,13 @@
     "rei_client": [
       {
         "adapter": "kotlin",
-        "value": "ph.mcmod.cs.MyRegistries$REIClient"
+        "value": "ph.mcmod.cs.rei.MyREIClientPlugin"
       }
     ],
     "rei_server": [
       {
         "adapter": "kotlin",
-        "value": "ph.mcmod.cs.MyRegistries$MyREIServerPlugin"
+        "value": "ph.mcmod.cs.rei.MyREIServerPlugin"
       }
     ]
   },

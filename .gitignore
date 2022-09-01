@@ -31,5 +31,3 @@ bin/
 # fabric
 
 run/
-/src/main/resources/assets/cubist_texture/test/
-/libs/

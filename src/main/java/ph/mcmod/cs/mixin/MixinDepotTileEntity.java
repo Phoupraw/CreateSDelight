@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import ph.mcmod.cs.game.InjectDepotTileEntity;
 
 import java.util.List;
-@Mixin(DepotTileEntity.class)
+@Mixin(value = DepotTileEntity.class,remap = false)
 public abstract class MixinDepotTileEntity extends SmartTileEntity implements InjectDepotTileEntity, FluidTransferable {
     private SmartFluidTankBehaviour tank;
     private double temperature;

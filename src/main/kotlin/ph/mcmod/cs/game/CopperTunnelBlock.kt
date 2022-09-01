@@ -3,7 +3,6 @@
 package ph.mcmod.cs.game
 
 import com.simibubi.create.AllBlocks
-import com.simibubi.create.content.contraptions.fluids.actors.ItemDrainBlock
 import com.simibubi.create.content.contraptions.wrench.IWrenchable
 import com.simibubi.create.content.logistics.block.belts.tunnel.BeltTunnelBlock
 import com.simibubi.create.foundation.block.ITE
@@ -18,15 +17,16 @@ import net.minecraft.item.ItemUsageContext
 import net.minecraft.state.StateManager
 import net.minecraft.state.property.EnumProperty
 import net.minecraft.util.ActionResult
+import net.minecraft.util.function.BooleanBiFunction
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.util.shape.VoxelShape
+import net.minecraft.util.shape.VoxelShapes
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
 import net.minecraft.world.WorldAccess
 import net.minecraft.world.WorldView
 import ph.mcmod.cs.MyRegistries
-import ph.mcmod.cs.api.printS
 import ph.mcmod.kum.EnumStringIdentifiable
 import ph.mcmod.kum.get
 
@@ -94,7 +94,7 @@ class CopperTunnelBlock(settings: Settings?) : Block(settings), ITE<CopperTunnel
             }
         }
         (world.getBlockEntity(pos) as? CopperTunnelBlockEntity)?.apply {
-            cachedState=resultState
+            cachedState = resultState
             updateFlaps()
         }
         return resultState
@@ -126,12 +126,12 @@ class CopperTunnelBlock(settings: Settings?) : Block(settings), ITE<CopperTunnel
     override fun onWrenched(state: BlockState, context: ItemUsageContext): ActionResult {
         val side = context.side
         context.world.setBlockState(context.blockPos, state.cycle(OPEN_STATES[side]))
-        ( context.world.getBlockEntity(context.blockPos) as? CopperTunnelBlockEntity)?.updateFlaps()
+        (context.world.getBlockEntity(context.blockPos) as? CopperTunnelBlockEntity)?.updateFlaps()
         return ActionResult.SUCCESS
     }
     
     companion object {
-        val SHAPE: VoxelShape = createCuboidShape(0.0, -3.0, 0.0, 16.0, 16.0, 16.0)
+        val SHAPE: VoxelShape = VoxelShapes.combine(createCuboidShape(0.0, -3.0, 0.0, 16.0, 16.0, 16.0), createCuboidShape(2.0, -3.0, 2.0, 14.0, 14.0, 14.0), BooleanBiFunction.ONLY_FIRST)
         val OPEN_STATES = Direction.Type.HORIZONTAL.associate { it to EnumProperty.of(it.asString(), OpenState::class.java) }
         fun getOpenState(blockState: BlockState, face: Direction): OpenState {
             if (blockState.block is CopperTunnelBlock) {

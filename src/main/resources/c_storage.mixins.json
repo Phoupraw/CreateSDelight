@@ -16,6 +16,7 @@
     "MixinItemDrainItemHandler",
     "MixinItemDrainTileEntity",
     "MixinItems",
+    "MixinLitBlazeBurnerBlock",
     "MixinMinecraftServer",
     "MixinPonderIndex",
     "MixinServerWorld",

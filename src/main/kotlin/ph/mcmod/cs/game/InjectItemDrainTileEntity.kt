@@ -120,7 +120,7 @@ interface InjectItemDrainTileEntity {
                 if (random.nextDouble() < chance) {
                     if (random.nextInt(5) == 0) {
                         val pos = blockPos.toCenter().add(0.0, 0.3125 + world.random.nextDouble() * 0.7, 0.0)
-                        world.addParticle(ParticleTypes.POOF, pos.z, pos.y, pos.z, 0.0, 0.0, 0.0)
+                        world.addParticle(ParticleTypes.POOF, pos.x, pos.y, pos.z, 0.0, 0.0, 0.0)
                     }
 //                        world.addParticles(ParticleTypes.POOF, false, blockPos.toCenter().add(0.0, 0.3125 + world.random.nextDouble() * 0.7, 0.0), Vec3d(0.0, 0.1, 0.0), 1.0, 0)
                 }

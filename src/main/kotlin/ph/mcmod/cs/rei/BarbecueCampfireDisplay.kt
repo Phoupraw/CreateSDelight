@@ -6,8 +6,6 @@ import me.shedaniel.rei.api.common.util.EntryIngredients
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.recipe.CampfireCookingRecipe
 import net.minecraft.util.Identifier
-import ph.mcmod.cs.MyRegistries
-import ph.mcmod.cs.game.BarbecueRecipe
 import java.util.*
 
 class BarbecueCampfireDisplay(inputs: List<EntryIngredient>, outputs: List<EntryIngredient>, location: Optional<Identifier>) : BarbecueDisplay(inputs, outputs, location) {
@@ -20,6 +18,6 @@ class BarbecueCampfireDisplay(inputs: List<EntryIngredient>, outputs: List<Entry
     }
     
     override fun getCategoryIdentifier(): CategoryIdentifier<*> {
-        return MyRegistries.REIClient.BARBECUE_CAMPFIRE
+        return MyREIClientPlugin.BARBECUE_CAMPFIRE_ID
     }
 }
