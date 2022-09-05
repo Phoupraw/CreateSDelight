@@ -2,10 +2,10 @@
 	"credit": "Made with Blockbench",
 	"parent": "block/block",
 	"textures": {
-		"0": "c_storage:block/copper_casing",
+		"0": "copper_casing:block/copper_casing",
 		"1": "c_storage:block/copper_tunnel",
 		"3": "c_storage:block/brass_funnel_back",
-		"particle": "c_storage:block/copper_casing"
+		"particle": "copper_casing:block/copper_casing"
 	},
 	"elements": [
 		{

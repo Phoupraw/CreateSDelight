@@ -8,6 +8,7 @@ import com.simibubi.create.foundation.ponder.PonderWorld
 import com.simibubi.create.foundation.tileEntity.TileEntityBehaviour
 import com.simibubi.create.foundation.tileEntity.behaviour.BehaviourType
 import com.simibubi.create.foundation.utility.BlockHelper
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes
@@ -117,13 +118,16 @@ interface InjectItemDrainTileEntity {
                     }
                 }
             }, { world, fluidVariant, amount, random, chance, blockPos, temperature ->
-                if (random.nextDouble() < chance) {
+                
                     if (random.nextInt(5) == 0) {
                         val pos = blockPos.toCenter().add(0.0, 0.3125 + world.random.nextDouble() * 0.7, 0.0)
                         world.addParticle(ParticleTypes.POOF, pos.x, pos.y, pos.z, 0.0, 0.0, 0.0)
+                        
                     }
-//                        world.addParticles(ParticleTypes.POOF, false, blockPos.toCenter().add(0.0, 0.3125 + world.random.nextDouble() * 0.7, 0.0), Vec3d(0.0, 0.1, 0.0), 1.0, 0)
-                }
+                    te . getFluidStorage (null)?.also { fluidStorage ->
+                        TransferUtil.extract(fluidStorage, FluidVariant.of(Fluids.WATER), 1)
+                    }
+                
             })
         }
         
@@ -136,19 +140,19 @@ interface InjectItemDrainTileEntity {
                     val c1 = 4.332272554161175
                     val x2 = 0.5098758983093371
                     val c3 = 0.8774689745773343
-                    val temperatureMultiplier =  (temperature.toDouble() - LOWEST_TEMPERATURE) / (LAVA_TEMPERATURE - LOWEST_TEMPERATURE)
+                    val temperatureMultiplier = (temperature.toDouble() - LOWEST_TEMPERATURE) / (LAVA_TEMPERATURE - LOWEST_TEMPERATURE)
                     val fluidAmountMultiplier = when (val x = amount.toDouble() / FluidConstants.BUCKET) {
                         in 0.0..1.0 -> x
                         else -> c1 * (x - x2).pow(5) + c3
                     }
                     val itemCountMultiplier = heldItemStack.count.toDouble().pow(-1 / 3.0)
-                    val step = temperatureMultiplier*fluidAmountMultiplier*itemCountMultiplier
+                    val step = temperatureMultiplier * fluidAmountMultiplier * itemCountMultiplier
                     heldItemStack.toastingDuration = (duration - step)
                     cir.returnValue = true
                     heldItem.beltPosition = 0.5f
                     heldItem.prevBeltPosition = 0.5f
                     processingTicks.element = 20
-    
+                    
                     val pos = getPos(blockPos, heldItem)
                     for (i in 0 until step.random().toInt()) {
                         if (random.nextInt(10) == 0) {
@@ -180,7 +184,7 @@ interface InjectItemDrainTileEntity {
                     heldItem.beltPosition = 0.5f
                     heldItem.prevBeltPosition = 0.5f
                     processingTicks.element = 20
-    
+                    
                     val pos = getPos(blockPos, heldItem)
                     for (i in 0 until step.random().toInt()) {
                         if (random.nextInt(20) == 0) {
@@ -196,6 +200,7 @@ interface InjectItemDrainTileEntity {
                 }
             })
         }
+        
         fun getPos(blockPos: BlockPos, heldItem: TransportedItemStack): Vec3d {
             val insertedFrom = heldItem.insertedFrom
             var sideOffset = heldItem.sideOffset.toDouble()

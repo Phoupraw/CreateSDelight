@@ -18,6 +18,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import ph.mcmod.cs.MixinDelegates;
+import ph.mcmod.cs.game.InjectBracketedKineticTileRenderer;
 import ph.mcmod.cs.game.RoastingGrill;
 @Mixin(BracketedKineticTileRenderer.class)
 public class MixinBracketedKineticTileRenderer extends KineticTileEntityRenderer {
@@ -28,6 +29,6 @@ public class MixinBracketedKineticTileRenderer extends KineticTileEntityRenderer
 
     @Inject(method = "renderSafe(Lcom/simibubi/create/content/contraptions/base/KineticTileEntity;FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;II)V", at = @At("HEAD"))
     private void renderRoastingItem(KineticTileEntity te, float partialTicks, MatrixStack ms, VertexConsumerProvider buffer, int light, int overlay, CallbackInfo ci) {
-        MixinDelegates.renderRoastingItem((BracketedKineticTileRenderer) (Object) this, te, partialTicks, ms, buffer, light, overlay);
+        InjectBracketedKineticTileRenderer.renderRoastingItem((BracketedKineticTileRenderer) (Object) this, te, partialTicks, ms, buffer, light, overlay);
     }
 }

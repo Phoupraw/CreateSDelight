@@ -1,8 +1,0 @@
-{
-  "tooltip.c_storage.vault": "第一角点：%s，再次右键以设置第二角点并放置。对着空气右键以取消第一角点。",
-  "item.c_storage.vault.set": "（已设置）",
-  "tooltip.c_storage.scarcity": "没有足够的%s！",
-  "tooltip.c_storage.set": "第一角点已设置为%s。",
-  "tooltip.c_storage.cancel": "第一角点已取消。",
-  "itemGroup.c_storage.item_group": "容积储存"
-}

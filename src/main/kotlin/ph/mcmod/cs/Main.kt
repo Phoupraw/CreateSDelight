@@ -2,7 +2,6 @@
 
 package ph.mcmod.cs
 
-import com.simibubi.create.api.behaviour.BlockSpoutingBehaviour
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
@@ -14,7 +13,6 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.server.command.CommandManager
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.hit.BlockHitResult
-import ph.mcmod.cs.game.InjectDepotTileEntity
 import ph.mcmod.kum.Asynchronization
 import ph.mcmod.kum.Fraction
 import ph.mcmod.kum.arrp.ArrpHelper
@@ -23,9 +21,9 @@ import ph.mcmod.kum.loadClass
 import java.util.logging.Logger
 
 @JvmField
-val LOGGER: Logger = Logger.getLogger(MOD_ID)
+val LOGGER: Logger = Logger.getLogger(CSD)
 @JvmField
-val ARRP_HELPER = ArrpHelper(MOD_ID)
+val ARRP_HELPER = ArrpHelper(CSD)
 
 val Item.stackSpace: Fraction
     get() = 1 f maxCount
@@ -43,7 +41,7 @@ object Main {
         
         // 给予玩家此模组的所有配方
         fun giveRecipes(server: MinecraftServer, players: Collection<ServerPlayerEntity>) {
-            val recipesIds = server.recipeManager.keys().toList().filter { it.namespace == MOD_ID }.toTypedArray()
+            val recipesIds = server.recipeManager.keys().toList().filter { it.namespace == CSD }.toTypedArray()
             players.forEach { it.unlockRecipes(recipesIds) }
         }
         ServerPlayConnectionEvents.JOIN.register { playNetworkHandler, packetSender, server ->

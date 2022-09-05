@@ -1,13 +1,20 @@
 package ph.mcmod.cs.game
 
+import com.simibubi.create.AllBlocks
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant
+import net.minecraft.item.ItemConvertible
 import net.minecraft.recipe.*
 import net.minecraft.util.Identifier
-import ph.mcmod.cs.MOD_ID
+import ph.mcmod.cs.CSD
 import ph.mcmod.cs.MyRegistries
 
 class BarbecueRecipe(id: Identifier, ingredient: Ingredient, result: ItemVariant, duration: Double) : SingleRecipe(id, ingredient, result, duration) {
-    constructor(recipe: CampfireCookingRecipe) : this(Identifier(MOD_ID, "${recipe.id.namespace}/${recipe.id.path}"), recipe.ingredients[0], ItemVariant.of(recipe.output), recipe.cookTime / 5.0)
+    constructor(recipe: CampfireCookingRecipe) : this(
+      Identifier(CSD, "${recipe.id.namespace}/${recipe.id.path}"),
+      recipe.ingredients[0],
+      ItemVariant.of(recipe.output),
+      recipe.cookTime / 5.0
+    )
     
     override fun getSerializer(): RecipeSerializer<*> {
         return Serializer
@@ -15,6 +22,10 @@ class BarbecueRecipe(id: Identifier, ingredient: Ingredient, result: ItemVariant
     
     override fun getType(): RecipeType<*> {
         return MyRegistries.MyRecipeTypes.BARBECUE
+    }
+    
+    override fun addRequiredMachines(list: MutableSet<ItemConvertible>) {
+        list += AllBlocks.ITEM_DRAIN.get()
     }
     
     object Serializer : SingleRecipe.Serializer<BarbecueRecipe>() {

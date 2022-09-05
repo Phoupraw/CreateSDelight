@@ -17,7 +17,7 @@ import org.jetbrains.annotations.ApiStatus
 import ph.mcmod.kum.arrp.ConcurrentJTag
 import ph.mcmod.kum.runAtClient
 import ph.mcmod.cs.ARRP_HELPER
-import ph.mcmod.cs.MOD_ID
+import ph.mcmod.cs.CSD
 
 /**
  * 显示在工具提示的物品简介
@@ -29,12 +29,12 @@ object SynopsisTooltip {
 	 * 在这个标签内的物品才会显示简介
 	 */
 	@JvmField
-	val TAG: TagKey<Item> = TagKey.of(Registry.ITEM.key, Identifier(MOD_ID, PATH))
+	val TAG: TagKey<Item> = TagKey.of(Registry.ITEM.key, Identifier(CSD, PATH))
 	private val J_TAG = ConcurrentJTag()
 	private val J_TAG_SET = mutableSetOf<Item>()
 	
 	init {
-		ARRP_HELPER.tags[Identifier(MOD_ID, "items/$PATH")] = J_TAG
+		ARRP_HELPER.tags[Identifier(CSD, "items/$PATH")] = J_TAG
 	}
 	/**
 	 * 添加简介

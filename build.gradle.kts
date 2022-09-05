@@ -80,15 +80,15 @@ tasks {
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> { kotlinOptions { jvmTarget = javaVersion.toString() } }
     jar { from("LICENSE") { rename { "${it}_${base.archivesName}" } } }
     processResources {
-        println(1)
+//        println(1)
         inputs.property("version", project.version)
-        println(2)
+//        println(2)
         filesMatching("fabric.mod.json") {
-            println(3)
+//            println(3)
             expand(mutableMapOf("version" to project.version))
-            println(4)
+//            println(4)
         }
-        println(5)
+//        println(5)
     }
     java {
         toolchain { languageVersion.set(JavaLanguageVersion.of(javaVersion.toString())) }

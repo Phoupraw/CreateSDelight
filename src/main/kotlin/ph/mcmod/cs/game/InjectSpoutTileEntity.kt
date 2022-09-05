@@ -8,7 +8,6 @@ import net.minecraft.nbt.NbtCompound
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.MathHelper
 import org.jetbrains.annotations.ApiStatus
-import ph.mcmod.cs.api.printS
 import ph.mcmod.kum.always
 import kotlin.math.pow
 

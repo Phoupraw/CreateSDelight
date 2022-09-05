@@ -2,45 +2,54 @@ package ph.mcmod.cs.game
 
 import com.google.gson.JsonObject
 import com.mojang.brigadier.StringReader
+import com.simibubi.create.compat.recipeViewerCommon.SequencedAssemblySubCategoryType
+import com.simibubi.create.content.contraptions.itemAssembly.IAssemblyRecipe
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant
 import net.minecraft.command.argument.NbtCompoundArgumentType
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NbtCompound
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.recipe.Ingredient
 import net.minecraft.recipe.Recipe
 import net.minecraft.recipe.RecipeSerializer
-import net.minecraft.recipe.RecipeType
+import net.minecraft.text.Text
+import net.minecraft.text.TranslatableText
 import net.minecraft.util.Identifier
 import net.minecraft.util.JsonHelper
 import net.minecraft.util.registry.Registry
 import net.minecraft.world.World
-import ph.mcmod.cs.MyRegistries
-import ph.mcmod.kum.id
 
-abstract class SingleRecipe(private val id: Identifier, val ingredient: Ingredient, val result: ItemVariant, val duration: Double) : Recipe<Inventory> {
-    
-    override fun matches(inventory: Inventory, world: World): Boolean {
-        return ingredient.test(inventory.getStack(0))
-    }
-    
-    override fun craft(inventory: Inventory): ItemStack {
-        return result.toStack()
-    }
-    
-    override fun fits(width: Int, height: Int): Boolean {
-        return true
+abstract class SingleRecipe(private val id: Identifier, val ingredient: Ingredient, val result: ItemVariant, val duration: Double) : Recipe<Inventory>,IAssemblyRecipe {
+    override fun getId(): Identifier {
+        return id
     }
     
     override fun getOutput(): ItemStack {
         return result.toStack()
     }
     
-    override fun getId(): Identifier {
-        return id
+    override fun craft(inventory: Inventory): ItemStack {
+        return output
     }
     
+    override fun matches(inventory: Inventory, world: World): Boolean {
+        return ingredient.test(inventory.getStack(0))
+    }
+    
+    override fun fits(width: Int, height: Int): Boolean {
+        return true
+    }
+    
+    override fun getDescriptionForAssembly(): Text {
+       return TranslatableText("recipe.${id.namespace}.${id.path}")
+    }
+    
+    override fun addAssemblyIngredients(list: MutableList<Ingredient>) {
+    
+    }
+    override fun getJEISubCategory(): SequencedAssemblySubCategoryType {
+        return SequencedAssemblySubCategoryType.PRESSING//TODO
+    }
     companion object {
         const val DEFUALT_DURATION = 100.0
     }

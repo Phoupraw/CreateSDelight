@@ -1,3 +1,3 @@
 package ph.mcmod.cs
 
-const val MOD_ID = "c_storage"
+const val CSD = "c_storage"

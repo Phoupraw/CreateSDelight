@@ -15,7 +15,7 @@ import net.minecraft.client.render.block.entity.BlockEntityRendererFactory
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.util.math.Direction
 import net.minecraft.util.math.MathHelper
-import ph.mcmod.cs.api.getOrThrow
+import ph.mcmod.kum.getOrThrow
 import kotlin.math.abs
 
 class CopperTunnelRenderer(context: BlockEntityRendererFactory.Context) : SmartTileEntityRenderer<CopperTunnelBlockEntity>(context) {

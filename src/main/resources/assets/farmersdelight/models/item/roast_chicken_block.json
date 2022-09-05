@@ -1,0 +1,13 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "farmersdelight:item/roast_chicken_block"
+  },
+  "overrides": [
+    {
+      "predicate": {"custom_model_data": 123},
+      "model": "c_storage:item/roast_chicken_block",
+      "comment": "没有盘子且居中的烤鸡"
+    }
+  ]
+}

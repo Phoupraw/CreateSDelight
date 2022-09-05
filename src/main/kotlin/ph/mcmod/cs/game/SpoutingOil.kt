@@ -14,7 +14,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.world.World
 
-class SpoutingOil : BlockSpoutingBehaviour() {
+object SpoutingOil : BlockSpoutingBehaviour() {
     override fun fillBlock(world: World, pos: BlockPos, te: SpoutTileEntity, availableFluid: FluidStack, simulate: Boolean): Long {
         val depot = world.getBlockEntity(pos) as? DepotTileEntity ?: return 0
         val fire = world.getBlockState(pos.down())

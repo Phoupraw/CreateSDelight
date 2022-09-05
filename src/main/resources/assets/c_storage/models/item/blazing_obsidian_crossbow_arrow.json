@@ -1,6 +1,0 @@
-{
-    "parent": "item/crossbow",
-    "textures": {
-        "layer0": "trifle:item/blazing_obsidian_crossbow_arrow"
-    }
-}

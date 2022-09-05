@@ -1,0 +1,19 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {"item": "snowball"},
+  "transitionalItem": {"item": "snowball"},
+  "sequence": [
+    {
+      "type": "create:pressing",
+      "ingredients": [{"item": "snowball"}],
+      "results": [{"item": "snowball"}]
+    },
+    {
+      "type": "c_storage:barbecue",
+      "ingredient": {"item": "snowball"},
+      "result": {"id": "snowball"}
+    }
+  ],
+  "results": [{"item": "farmersdelight:bacon", "count": 2}],
+  "loops": 1
+}

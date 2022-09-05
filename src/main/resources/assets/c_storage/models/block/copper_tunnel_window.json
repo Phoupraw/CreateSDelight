@@ -3,7 +3,7 @@
 	"parent": "block/block",
 	"textures": {
 		"1": "c_storage:block/copper_tunnel",
-		"particle": "c_storage:block/copper_casing"
+		"particle": "create:block/copper_casing"
 	},
 	"elements": [
 		{

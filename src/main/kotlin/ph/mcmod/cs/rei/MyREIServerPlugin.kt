@@ -9,6 +9,7 @@ object MyREIServerPlugin : REIServerPlugin {
         registry.register(MyREIClientPlugin.BARBECUE_ID, SingleDisplay.serializer(::BarbecueDisplay))
         registry.register(MyREIClientPlugin.BARBECUE_CAMPFIRE_ID, SingleDisplay.serializer(::BarbecueCampfireDisplay))
         registry.register(MyREIClientPlugin.STEAMING_ID, SingleDisplay.serializer(::SteamingDisplay))
+        registry.register(MyREIClientPlugin.ROASTING_ID, SingleDisplay.serializer(::RoastingDisplay))
     
     }
     

@@ -1,0 +1,116 @@
+{
+	"credit": "Made with Blockbench",
+	"parent": "block/block",
+	"textures": {
+		"1": "c_storage:item/raw_roast_chicken_gibs",
+		"particle": "c_storage:item/raw_roast_chicken_body"
+	},
+	"elements": [
+		{
+			"name": "body",
+			"from": [4, 5, 4],
+			"to": [12, 12, 12],
+			"faces": {
+				"north": {"uv": [8, 1, 16, 8], "texture": "#particle"},
+				"east": {"uv": [0, 9, 8, 16], "texture": "#particle"},
+				"south": {"uv": [8, 9, 16, 16], "texture": "#particle"},
+				"west": {"uv": [8, 9, 0, 16], "texture": "#particle"},
+				"up": {"uv": [0, 0, 8, 8], "texture": "#particle"},
+				"down": {"uv": [8, 8, 16, 16], "texture": "#particle"}
+			}
+		},
+		{
+			"name": "left_wing",
+			"from": [2, 5, 3],
+			"to": [4, 8, 7],
+			"faces": {
+				"north": {"uv": [12, 13, 14, 16], "texture": "#1"},
+				"east": {"uv": [8, 13, 12, 16], "texture": "#1"},
+				"south": {"uv": [12, 13, 14, 16], "texture": "#1"},
+				"west": {"uv": [12, 13, 8, 16], "texture": "#1"},
+				"up": {"uv": [12, 9, 14, 13], "texture": "#1"},
+				"down": {"uv": [12, 9, 14, 13], "texture": "#1"}
+			}
+		},
+		{
+			"name": "left_leg",
+			"from": [2, 8, 9],
+			"to": [4, 11, 13],
+			"faces": {
+				"north": {"uv": [12, 13, 14, 16], "texture": "#1"},
+				"east": {"uv": [8, 13, 12, 16], "texture": "#1"},
+				"south": {"uv": [14, 13, 16, 16], "texture": "#1"},
+				"west": {"uv": [12, 13, 8, 16], "texture": "#1"},
+				"up": {"uv": [12, 9, 14, 13], "texture": "#1"},
+				"down": {"uv": [12, 9, 14, 13], "texture": "#1"}
+			}
+		},
+		{
+			"name": "right_wing",
+			"from": [12, 5, 3],
+			"to": [14, 8, 7],
+			"faces": {
+				"north": {"uv": [12, 13, 14, 16], "texture": "#1"},
+				"east": {"uv": [8, 13, 12, 16], "texture": "#1"},
+				"south": {"uv": [12, 13, 14, 16], "texture": "#1"},
+				"west": {"uv": [12, 13, 8, 16], "texture": "#1"},
+				"up": {"uv": [12, 9, 14, 13], "texture": "#1"},
+				"down": {"uv": [12, 9, 14, 13], "texture": "#1"}
+			}
+		},
+		{
+			"name": "right_leg",
+			"from": [12, 8, 9],
+			"to": [14, 11, 13],
+			"faces": {
+				"north": {"uv": [12, 13, 14, 16], "texture": "#1"},
+				"east": {"uv": [8, 13, 12, 16], "texture": "#1"},
+				"south": {"uv": [14, 13, 16, 16], "texture": "#1"},
+				"west": {"uv": [12, 13, 8, 16], "texture": "#1"},
+				"up": {"uv": [12, 9, 14, 13], "texture": "#1"},
+				"down": {"uv": [12, 9, 14, 13], "texture": "#1"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 2.5, 0],
+			"scale": [0.55, 0.55, 0.55]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 2.5, 0],
+			"scale": [0.55, 0.55, 0.55]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, 45, 0],
+			"scale": [0.68, 0.68, 0.68]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, 225, 0],
+			"scale": [0.68, 0.68, 0.68]
+		},
+		"ground": {
+			"translation": [0, 3, 0],
+			"scale": [0.5, 0.5, 0.5]
+		},
+		"gui": {
+			"rotation": [30, 225, 0]
+		},
+		"head": {
+			"scale": [2, 2, 2]
+		},
+		"fixed": {
+			"scale": [1.25, 1.25, 1.25]
+		}
+	},
+	"groups": [
+		{
+			"name": "chicken",
+			"origin": [8, 8, 8],
+			"color": 0,
+			"children": [0, 1, 2, 3, 4]
+		}
+	]
+}

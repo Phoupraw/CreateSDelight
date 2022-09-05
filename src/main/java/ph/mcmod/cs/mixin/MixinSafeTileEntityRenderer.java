@@ -20,6 +20,6 @@ public abstract class MixinSafeTileEntityRenderer<T extends BlockEntity> impleme
     @Inject(method = "render", at = @At("HEAD"))
     private void testSafeRender(T te, float partialTicks, MatrixStack ms, VertexConsumerProvider buffer, int light, int overlay, CallbackInfo ci) {
         //noinspection unchecked
-        MixinDelegates.testSafeRender((SafeTileEntityRenderer<T>) (Object) this, te, partialTicks, ms, buffer, light, overlay);
+//        MixinDelegates.testSafeRender((SafeTileEntityRenderer<T>) (Object) this, te, partialTicks, ms, buffer, light, overlay);
     }
 }

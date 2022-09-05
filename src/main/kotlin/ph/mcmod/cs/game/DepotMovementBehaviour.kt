@@ -13,7 +13,6 @@ import net.minecraft.client.render.OverlayTexture
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.render.WorldRenderer
 import net.minecraft.client.render.model.json.ModelTransformation
-import ph.mcmod.cs.api.printS
 
 object DepotMovementBehaviour : MovementBehaviour {
     private var MovementContext.startTime: Long
