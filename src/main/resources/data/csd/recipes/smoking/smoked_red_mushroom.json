@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smoking",
+  "ingredient": {
+    "item": "csd:chopped_red_mushroom"
+  },
+  "result": "csd:smoked_red_mushroom",
+  "experience": 0.35,
+  "cookingtime": 100
+}

@@ -1,0 +1,7 @@
+{
+  "type": "create:compacting",
+  "ingredients": [
+    {"item": "minecraft:sunflower"}
+  ],
+  "results": [{"fluid": "csd:sunflower_oil", "amount": 13500}]
+}

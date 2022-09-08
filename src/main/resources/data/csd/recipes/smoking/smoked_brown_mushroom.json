@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smoking",
+  "ingredient": {
+    "item": "csd:chopped_brown_mushroom"
+  },
+  "result": "csd:smoked_brown_mushroom",
+  "experience": 0.35,
+  "cookingtime": 100
+}

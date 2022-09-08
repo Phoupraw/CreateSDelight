@@ -1,0 +1,17 @@
+{
+  "type": "farmersdelight:cutting",
+  "ingredients": [
+    {
+      "item": "minecraft:brown_mushroom"
+    }
+  ],
+  "tool": {
+    "tag": "farmersdelight:tools/knives"
+  },
+  "result": [
+    {
+      "item": "csd:chopping_brown_mushroom",
+      "count": 1
+    }
+  ]
+}

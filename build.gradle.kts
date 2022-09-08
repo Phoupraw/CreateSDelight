@@ -34,6 +34,7 @@ repositories {
     maven("https://maven.jamieswhiteshirt.com/libs-release") // Reach Entity Attributes
     maven("https://jitpack.io/") // Mixin Extras, fabric ASM, nbtcrafting testing dependencies
     maven("D:/CCC/Documents/01_Programming/Fabric Mod/farmers-delight-fabric-1.18.2-0.2.1/publish")//本地编译的农夫乐事
+//    flatDir{dir("D:\\CCC\\Documents\\01_Programming\\Fabric Mod\\brrp")}//BRRP
 }
 dependencies {
     val minecraftVersion: String by project
@@ -59,6 +60,9 @@ dependencies {
     
     val arrp: String by project
     modImplementation("net.devtech", "arrp", arrp)
+    //ARRP已经被包含在BRRP中
+//    modImplementation(files("D:\\CCC\\Documents\\01_Programming\\Fabric Mod\\brrp-0.7.0-1.18.2.jar"))//BRRP
+    
     val kt_util: String by project
     modImplementation(include("ph.mcmod", "KotlinUtilMinecraft", kt_util))
     val trinkets: String by project
@@ -98,5 +102,5 @@ tasks {
     }
 }
 loom {
-    accessWidenerPath.set(file("src/main/resources/c_storage.accesswidener"))
+    accessWidenerPath.set(file("src/main/resources/csd.accesswidener"))
 }

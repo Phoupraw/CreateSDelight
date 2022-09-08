@@ -1,0 +1,37 @@
+{
+  "multipart": [
+    {"apply": {"model": "csd:block/copper_tunnel_frame"}},
+    {
+      "when": {"north": "close"},
+      "apply": {"model": "csd:block/copper_tunnel_close"}
+    },
+    {
+      "when": {"east": "close"},
+      "apply": {"model": "csd:block/copper_tunnel_close", "y": 90}
+    },
+    {
+      "when": {"south": "close"},
+      "apply": {"model": "csd:block/copper_tunnel_close", "y": 180}
+    },
+    {
+      "when": {"west": "close"},
+      "apply": {"model": "csd:block/copper_tunnel_close", "y": 270}
+    },
+    {
+      "when": {"north": "window"},
+      "apply": {"model": "csd:block/copper_tunnel_window"}
+    },
+    {
+      "when": {"east": "window"},
+      "apply": {"model": "csd:block/copper_tunnel_window", "y": 90}
+    },
+    {
+      "when": {"south": "window"},
+      "apply": {"model": "csd:block/copper_tunnel_window", "y": 180}
+    },
+    {
+      "when": {"west": "window"},
+      "apply": {"model": "csd:block/copper_tunnel_window", "y": 270}
+    }
+  ]
+}

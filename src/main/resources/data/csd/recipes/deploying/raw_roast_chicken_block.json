@@ -1,0 +1,10 @@
+{
+  "type": "create:deploying",
+  "ingredients": [
+    {"item": "csd:full_chicken"},
+    {"item": "csd:chopped_vegetables"}
+  ],
+  "results": [
+    {"item": "csd:raw_roast_chicken_block", "count": 1}
+  ]
+}

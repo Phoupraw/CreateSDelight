@@ -1,0 +1,13 @@
+{
+  "type": "create:mixing",
+  "ingredients": [
+    {"item": "potato"},
+    {"item": "carrot"},
+    {"item": "beetroot"},
+    {"item": "farmersdelight:tomato"},
+    {"item": "farmersdelight:onion"},
+    {"item": "farmersdelight:cabbage_leaf"},
+    {"fluid": "csd:sunflower_oil", "amount": 1000}
+  ],
+  "results": [{"item": "csd:chopped_vegetables", "count": 2}]
+}

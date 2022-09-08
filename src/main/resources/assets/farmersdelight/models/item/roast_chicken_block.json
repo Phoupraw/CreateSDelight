@@ -6,7 +6,7 @@
   "overrides": [
     {
       "predicate": {"custom_model_data": 123},
-      "model": "c_storage:item/roast_chicken_block",
+      "model": "csd:item/roast_chicken_block",
       "comment": "没有盘子且居中的烤鸡"
     }
   ]

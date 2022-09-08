@@ -1,0 +1,10 @@
+{
+  "type": "csd:steeping",
+  "ingredients": [
+    {"item": "csd:diced_pork"},
+    {"item": "csd:salt"},
+    {"fluid": "water", "amount": 1000}
+  ],
+  "results": [{"item": "csd:marinate_diced_pork", "count": 1}],
+  "processingTime": 50
+}

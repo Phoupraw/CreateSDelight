@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:campfire_cooking",
+  "ingredient": {
+    "item": "csd:chopped_red_mushroom"
+  },
+  "result": "csd:baked_red_mushroom",
+  "experience": 0.35,
+  "cookingtime": 600
+}

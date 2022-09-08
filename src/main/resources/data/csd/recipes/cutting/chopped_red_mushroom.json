@@ -1,0 +1,17 @@
+{
+  "type": "farmersdelight:cutting",
+  "ingredients": [
+    {
+      "item": "csd:chopping_red_mushroom"
+    }
+  ],
+  "tool": {
+    "tag": "farmersdelight:tools/knives"
+  },
+  "result": [
+    {
+      "item": "csd:chopped_red_mushroom",
+      "count": 1
+    }
+  ]
+}

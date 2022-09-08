@@ -1,0 +1,35 @@
+{
+  "required": true,
+  "package": "ph.mcmod.csd.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "MixinAllPackets",
+    "MixinBasinRecipe",
+    "MixinBasinTileEntity",
+    "MixinBracketedKineticTileEntity",
+    "MixinDepotBehaviour",
+    "MixinDepotBlock",
+    "MixinDepotTileEntity",
+    "MixinFarmersDelightMod",
+    "MixinFluidBlock",
+    "MixinItemDrainItemHandler",
+    "MixinItemDrainTileEntity",
+    "MixinItems",
+    "MixinLitBlazeBurnerBlock",
+    "MixinMinecraftServer",
+    "MixinPonderIndex",
+    "MixinServerWorld",
+    "MixinShaftBlock",
+    "MixinSpoutTileEntity"
+  ],
+  "client": [
+    "MixinBasinRenderer",
+    "MixinBracketedKineticTileRenderer",
+    "MixinDepotRenderer",
+    "MixinItemDrainRenderer",
+    "MixinSafeTileEntityRenderer"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

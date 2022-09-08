@@ -1,9 +1,0 @@
-{
-  "type": "minecraft:smoking",
-  "ingredient": {
-    "item": "c_storage:chopped_red_mushroom"
-  },
-  "result": "c_storage:smoked_red_mushroom",
-  "experience": 0.35,
-  "cookingtime": 100
-}

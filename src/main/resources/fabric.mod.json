@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "c_storage",
+  "id": "csd",
   "version": "${version}",
   "name": "CapacityStorage",
   "description": "translate",
@@ -10,22 +10,22 @@
     "issues": "https://github.com/Phoupraw/TODO/issues"
   },
   "license": "TODO",
-  "icon": "assets/c_storage/icon.png",
+  "icon": "assets/csd/icon.png",
   "environment": "*",
-  "mixins": ["c_storage.mixins.json"],
+  "mixins": ["csd.mixins.json"],
   "entrypoints": {
-    "main": ["ph.mcmod.cs.Main::init"],
-    "client": ["ph.mcmod.cs.ClientMain::init"],
+    "main": ["ph.mcmod.csd.Main::init"],
+    "client": ["ph.mcmod.csd.ClientMain::init"],
     "rei_client": [
       {
         "adapter": "kotlin",
-        "value": "ph.mcmod.cs.rei.MyREIClientPlugin"
+        "value": "ph.mcmod.csd.rei.MyREIClientPlugin"
       }
     ],
     "rei_server": [
       {
         "adapter": "kotlin",
-        "value": "ph.mcmod.cs.rei.MyREIServerPlugin"
+        "value": "ph.mcmod.csd.rei.MyREIServerPlugin"
       }
     ]
   },
@@ -34,7 +34,8 @@
     "fabricloader": "*",
     "fabric": "*",
     "fabric-language-kotlin": "*",
-    "advanced_runtime_resource_pack": ">=0.5.7"
+    "advanced_runtime_resource_pack": ">=0.5.7",
+    "create": "*"
   },
   "suggests": {
     "iceberg": "*"
@@ -43,5 +44,5 @@
     "loom:injected_interfaces": {
     }
   },
-  "accessWidener": "c_storage.accessWidener"
+  "accessWidener": "csd.accessWidener"
 }

@@ -1,0 +1,18 @@
+{
+  "type": "farmersdelight:cooking",
+  "ingredients": [
+    {
+      "item": "csd:mushroom_soup"
+    },
+    {
+      "item": "csd:smoked_red_mushroom"
+    },
+    {
+      "item": "csd:smoked_brown_mushroom"
+    }
+  ],
+  "result": {
+    "item": "csd:mushroom_stew"
+  },
+  "cookingtime": 200
+}

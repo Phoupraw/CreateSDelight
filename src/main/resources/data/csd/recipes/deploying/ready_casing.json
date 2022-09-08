@@ -1,0 +1,10 @@
+{
+  "type": "create:deploying",
+  "ingredients": [
+    {"item": "csd:casing"},
+    {"item": "csd:marinate_diced_pork"}
+  ],
+  "results": [
+    {"item": "csd:ready_casing", "count": 1}
+  ]
+}

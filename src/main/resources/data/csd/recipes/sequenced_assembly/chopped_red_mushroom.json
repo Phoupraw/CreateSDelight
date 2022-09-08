@@ -1,0 +1,16 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {"item": "minecraft:red_mushroom"},
+  "transitionalItem": {"item": "csd:chopping_red_mushroom"},
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [{"item": "csd:chopping_red_mushroom"}, {"tag": "farmersdelight:tools/knives"}],
+      "results": [{"item": "csd:chopping_red_mushroom"}]
+    }
+  ],
+  "results": [
+    {"item": "csd:chopped_red_mushroom", "count": 2}
+  ],
+  "loops": 4
+}

@@ -1,0 +1,8 @@
+{
+  "type": "create:mixing",
+  "ingredients": [
+    {"item": "csd:intestine"},
+    {"fluid": "water", "amount": 4500}
+  ],
+  "results": [{"item": "csd:casing", "count": 5}]
+}

@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "axis_x=true": {"model": "csd:block/drying_rack"},
+    "axis_x=false": {"model": "csd:block/drying_rack", "y": 90}
+  }
+}

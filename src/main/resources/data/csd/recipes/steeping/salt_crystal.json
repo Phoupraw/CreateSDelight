@@ -1,0 +1,8 @@
+{
+  "type": "csd:steeping",
+  "ingredients": [
+    {"fluid": "water", "amount": 81000}
+  ],
+  "results": [{"item": "csd:salt_crystal", "count": 2}],
+  "processingTime": 100
+}

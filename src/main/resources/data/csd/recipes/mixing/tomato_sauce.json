@@ -1,0 +1,8 @@
+{
+  "type": "create:mixing",
+  "ingredients": [
+    {"item": "farmersdelight:tomato"},
+    {"item": "farmersdelight:tomato"}
+  ],
+  "results": [{"fluid": "csd:tomato_sauce", "amount": 27000}]
+}

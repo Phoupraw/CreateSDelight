@@ -1,0 +1,10 @@
+{
+  "type": "create:milling",
+  "ingredients": [
+    {"item": "csd:salt_crystal"}
+  ],
+  "results": [
+    {"item": "csd:salt", "count": 5}
+  ],
+  "processingTime": 70
+}
