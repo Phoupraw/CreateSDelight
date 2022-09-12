@@ -72,6 +72,8 @@ dependencies {
     val farmersdelight: String by project
     modImplementation("com.nhoryzon.mc", "farmers-delight-fabric", farmersdelight)
     
+//    modApi("me.shedaniel.cloth:cloth-config-fabric:8.2.88") { exclude(mapOf(group to "net.fabricmc.fabric-api")) }
+
 }
 tasks {
     val javaVersion = JavaVersion.VERSION_17

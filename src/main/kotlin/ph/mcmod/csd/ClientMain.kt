@@ -16,6 +16,7 @@ import net.minecraft.client.particle.WaterBubbleParticle
 import net.minecraft.client.render.RenderLayer
 import net.minecraft.screen.PlayerScreenHandler
 import ph.mcmod.csd.game.CopperTunnelRenderer
+import ph.mcmod.csd.game.DryingRackRenderer
 import ph.mcmod.kum.preBlock
 import ph.mcmod.kum.preItem
 
@@ -30,14 +31,14 @@ object ClientMain {
         
         
         BlockEntityRendererRegistry.register(MyRegistries.MyBlockEntityTypes.COPPER_TUNNEL, ::CopperTunnelRenderer)
+        BlockEntityRendererRegistry.register(MyRegistries.MyBlockEntityTypes.DRYING_RACK, ::DryingRackRenderer)
         BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), MyRegistries.MyBlocks.COPPER_TUNNEL)
         
         
         MyRegistries.arrpHelper.packAfter.addModel(JModel.model(AllBlocks.ITEM_DRAIN.id.preBlock())
-          .addOverride(JOverride(JCondition().parameter("custom_model_data",1),"$CSD:item/item_drain_water"))
-          .addOverride(JOverride(JCondition().parameter("custom_model_data",2),"$CSD:item/item_drain_lava"))
-          , AllBlocks.ITEM_DRAIN.id.preItem())
-    
+          .addOverride(JOverride(JCondition().parameter("custom_model_data", 1), "$CSD:item/item_drain_water"))
+          .addOverride(JOverride(JCondition().parameter("custom_model_data", 2), "$CSD:item/item_drain_lava")), AllBlocks.ITEM_DRAIN.id.preItem())
+        
         ClientSpriteRegistryCallback.event(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE).register { atlasTexture, registry ->
             registry.register(MyRegistries.id("particle/oil_bubble"))
         }

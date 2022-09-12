@@ -14,6 +14,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.world.World
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable
+import ph.mcmod.csd.MyRegistries
 import ph.mcmod.kum.always
 import ph.mcmod.kum.asStorage
 import ph.mcmod.kum.isEmpty
@@ -38,14 +39,16 @@ interface InjectShaftBlock {
     
         @JvmStatic
         fun onWrenched(block: ShaftBlock, state: BlockState, context: ItemUsageContext): ActionResult {
-            if (state.get(RotatedPillarKineticBlock.AXIS)==Direction.Axis.Y)return ActionResult.PASS
+            val axis = state.get(RotatedPillarKineticBlock.AXIS)
+            if (axis==Direction.Axis.Y)return ActionResult.PASS
             val world = context.world
             val side = context.side
+            if (side.axis!=axis) return ActionResult.PASS
             val pos = context.blockPos
             val te = world.getBlockEntity(pos)as? SimpleKineticTileEntity ?:return ActionResult.PASS
             if (te.speed!=0f) return ActionResult.PASS
-            
-            TODO("Not yet implemented")
+            world.setBlockState(pos,MyRegistries.MyBlocks.DRYING_RACK.defaultState.with(DryingRackBlock.AXIS_X,axis==Direction.Axis.X))
+            return ActionResult.SUCCESS
         }
     }
 }

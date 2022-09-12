@@ -77,6 +77,8 @@ object MyRegistries : RegistryHelper(CSD, { MyItems.STEAMED_BUNS.defaultStack })
     object MyBlockEntityTypes {
         @JvmField
         val COPPER_TUNNEL: BlockEntityType<CopperTunnelBlockEntity> = FabricBlockEntityTypeBuilder.create(::CopperTunnelBlockEntity).addBlock(MyBlocks.COPPER_TUNNEL).build().register("copper_tunnel")
+        @JvmField
+        val DRYING_RACK: BlockEntityType<DryingRackBlockEntity> = FabricBlockEntityTypeBuilder.create(::DryingRackBlockEntity).addBlock(MyBlocks.DRYING_RACK).build().register("drying_rack")
         
     }
     
@@ -143,8 +145,8 @@ object MyRegistries : RegistryHelper(CSD, { MyItems.STEAMED_BUNS.defaultStack })
           .register("intestine")
           .lang("肠子")
         @JvmField
-        val READY_CASING = Item(ItemSettings())
-          .register("ready_casing")
+        val READY_SAUSAGE = Item(ItemSettings())
+          .register("ready_sausage")
           .lang("灌好的肠")
         @JvmField
         val SAUSAGE = Item(ItemSettings())
@@ -306,6 +308,8 @@ object MyRegistries : RegistryHelper(CSD, { MyItems.STEAMED_BUNS.defaultStack })
         val BARBECUE = registerRecipeType("barbecue", BarbecueRecipe.Serializer)
         @JvmField
         val ROASTING = registerRecipeType("roasting", RoastingRecipe.Serializer)
+        @JvmField
+        val DRYING = registerRecipeType("drying", DryingRecipe.Serializer)
         
     }
     

@@ -1,7 +1,7 @@
 {
   "type": "create:mixing",
   "ingredients": [
-    {"item": "pork"}
+    {"item": "porkchop"}
   ],
   "results": [{"item": "csd:diced_pork"}]
 }

@@ -37,17 +37,9 @@ interface InjectBracketedKineticTileRenderer {
             val angle = (time * te.speed * 3f / 10 + offset) % 360 / 180 * Math.PI.toFloat()
             ms.multiply(Quaternion(axis[true].unitVector, angle, false))
             when (axis) {
-                Direction.Axis.X -> {
-                    ms.multiply(Quaternion(Vec3f(0f, 1f, 0f), 90f, true))
-                }
-                
-                Direction.Axis.Y -> {
-                    ms.multiply(Quaternion(Vec3f(1f, 0f, 0f), 90f, true))
-                }
-                
-                Direction.Axis.Z -> {
-                
-                }
+                Direction.Axis.X -> ms.multiply(Quaternion(Vec3f(0f, 1f, 0f), 90f, true))
+                Direction.Axis.Y -> ms.multiply(Quaternion(Vec3f(1f, 0f, 0f), 90f, true))
+                Direction.Axis.Z -> {}
             }
             val model3d = modelStack.modelHasDepth(te.world)
             val scale = if (model3d) 1f else 1f

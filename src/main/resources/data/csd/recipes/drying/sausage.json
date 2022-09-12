@@ -1,0 +1,9 @@
+{
+  "type": "csd:drying",
+  "ingredient": {
+    "item": "csd:ready_sausage"
+  },
+  "result": {
+    "id": "csd:sausage"
+  }
+}

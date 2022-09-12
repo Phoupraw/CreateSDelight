@@ -28,8 +28,8 @@ public abstract class MixinShaftBlock extends AbstractSimpleShaftBlock {
 
     @Override
     public ActionResult onWrenched(BlockState state, ItemUsageContext context) {
-        ActionResult result = super.onWrenched(state, context);
+        ActionResult result = InjectShaftBlock.onWrenched((ShaftBlock) (Object) this, state, context);
         if (result != ActionResult.PASS) return result;
-        return InjectShaftBlock.onWrenched((ShaftBlock) (Object) this, state, context);
+        return super.onWrenched(state, context);
     }
 }
