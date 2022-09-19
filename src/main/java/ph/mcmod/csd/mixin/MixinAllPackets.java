@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import ph.mcmod.csd.MyRegistries;
 import ph.mcmod.kum.KtUtilKt;
-@Mixin(value = AllPackets.class, remap = false)
+@Mixin(value = AllPackets.class,remap = false)
 public class MixinAllPackets {
     @Inject(method = "registerPackets", at = @At("RETURN"))
     private static void register(CallbackInfo ci) {

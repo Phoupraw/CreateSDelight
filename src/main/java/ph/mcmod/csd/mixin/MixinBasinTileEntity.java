@@ -27,12 +27,13 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import ph.mcmod.csd.game.InjectBasinTileEntity;
 
 import java.util.Iterator;
-@Mixin(value = BasinTileEntity.class, remap = false)
+@Mixin(value = BasinTileEntity.class)
 public abstract class MixinBasinTileEntity extends SmartTileEntity implements InjectBasinTileEntity {
     private double temperature = 25;
     private double animationTicks = 0;
     private final Object recipeKey = new Object();
     private @Nullable Double steepingDuration;
+    private @Nullable Double youtiaoDuration;
     private Storage<ItemVariant> targetInv;
     private Transaction nested;
 
@@ -77,14 +78,27 @@ public abstract class MixinBasinTileEntity extends SmartTileEntity implements In
         this.steepingDuration = steepingDuration;
     }
 
-    @Inject(method = "tick", at = @At("HEAD"))
-    private void tickBoil(CallbackInfo ci) {
-        InjectBasinTileEntity.tickBoil((BasinTileEntity) (Object) this);
+    @Nullable
+    @Override
+    public Double getYoutiaoDuration() {
+        return youtiaoDuration;
     }
-    @Inject(method = "tick", at = @At(value = "INVOKE",target = "Lcom/simibubi/create/foundation/tileEntity/SmartTileEntity;tick()V",shift = At.Shift.AFTER))
+
+    @Override
+    public void setYoutiaoDuration(@Nullable Double youtiaoDuration) {
+        this.youtiaoDuration = youtiaoDuration;
+    }
+
+    @Inject(method = "tick", at = @At("HEAD"), remap = false)
+    private void tick(CallbackInfo ci) {
+        InjectBasinTileEntity.tick((BasinTileEntity) (Object) this);
+    }
+
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lcom/simibubi/create/foundation/tileEntity/SmartTileEntity;tick()V", shift = At.Shift.AFTER))
     private void tickSteeping(CallbackInfo ci) {
         InjectBasinTileEntity.tickSteeping((BasinTileEntity) (Object) this);
     }
+
     @Inject(method = "write", at = @At("HEAD"))
     private void write(NbtCompound compound, boolean clientPacket, CallbackInfo ci) {
         compound.putDouble("temperature", getTemperature());
@@ -101,9 +115,9 @@ public abstract class MixinBasinTileEntity extends SmartTileEntity implements In
         this.nested = nested;
     }
 
-    @Redirect(method = "tryClearingSpoutputOverflow", at = @At(value = "INVOKE", target = "Lnet/fabricmc/fabric/api/transfer/v1/storage/Storage;insert(Ljava/lang/Object;JLnet/fabricmc/fabric/api/transfer/v1/transaction/TransactionContext;)J", ordinal = 0))
+    @Redirect(method = "tryClearingSpoutputOverflow", at = @At(value = "INVOKE", target = "Lnet/fabricmc/fabric/api/transfer/v1/storage/Storage;insert(Ljava/lang/Object;JLnet/fabricmc/fabric/api/transfer/v1/transaction/TransactionContext;)J", ordinal = 0), remap = false)
     private long modifyOutput(Storage<ItemVariant> targetInv, Object itemVariant, long amount, TransactionContext nested) {
-        return InjectBasinTileEntity.modifyOutput((BasinTileEntity) (Object) this,targetInv,(ItemVariant) itemVariant,amount, nested);
+        return InjectBasinTileEntity.modifyOutput((BasinTileEntity) (Object) this, targetInv, (ItemVariant) itemVariant, amount, nested);
     }
 
 }

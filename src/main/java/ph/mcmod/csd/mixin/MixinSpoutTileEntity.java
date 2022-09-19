@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import ph.mcmod.csd.game.InjectSpoutTileEntity;
-@Mixin(value = SpoutTileEntity.class,remap = false)
+@Mixin(value = SpoutTileEntity.class)
 public abstract class MixinSpoutTileEntity extends SmartTileEntity implements InjectSpoutTileEntity {
     private boolean shouldParticle;
 
@@ -32,7 +32,7 @@ public abstract class MixinSpoutTileEntity extends SmartTileEntity implements In
         this.shouldParticle = shouldParticle;
     }
 
-    @Inject(method = "tick", at = @At(value = "RETURN"))
+    @Inject(method = "tick", at = @At(value = "RETURN"), remap = false)
     private void tickOil(CallbackInfo ci) {
         InjectSpoutTileEntity.tickOil((SpoutTileEntity) (Object) this);
     }
@@ -50,16 +50,19 @@ public abstract class MixinSpoutTileEntity extends SmartTileEntity implements In
             ci.cancel();
         }
     }
+
     @Inject(method = "read", at = @At("HEAD"))
     private void read(NbtCompound compound, boolean clientPacket, CallbackInfo ci) {
-        InjectSpoutTileEntity.read((SpoutTileEntity)(Object)this,compound,clientPacket);
+        InjectSpoutTileEntity.read((SpoutTileEntity) (Object) this, compound, clientPacket);
     }
+
     @Inject(method = "write", at = @At("HEAD"))
     private void write(NbtCompound compound, boolean clientPacket, CallbackInfo ci) {
-        InjectSpoutTileEntity.write((SpoutTileEntity)(Object)this,compound,clientPacket);
+        InjectSpoutTileEntity.write((SpoutTileEntity) (Object) this, compound, clientPacket);
     }
-    @Inject(method = "lambda$tick$0",at = @At(value = "FIELD",opcode = Opcodes.PUTFIELD,target = "Lcom/simibubi/create/content/contraptions/fluids/actors/SpoutTileEntity;customProcess:Lcom/simibubi/create/api/behaviour/BlockSpoutingBehaviour;",shift = At.Shift.AFTER))
+
+    @Inject(method = "lambda$tick$0", at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lcom/simibubi/create/content/contraptions/fluids/actors/SpoutTileEntity;customProcess:Lcom/simibubi/create/api/behaviour/BlockSpoutingBehaviour;", shift = At.Shift.AFTER), remap = false)
     private void afterSetCustomProcess(FluidStack currentFluidInTank, BlockSpoutingBehaviour behaviour, CallbackInfo ci) {
-        InjectSpoutTileEntity.onSetCustomProcess((SpoutTileEntity)(Object)this);
+        InjectSpoutTileEntity.onSetCustomProcess((SpoutTileEntity) (Object) this);
     }
 }

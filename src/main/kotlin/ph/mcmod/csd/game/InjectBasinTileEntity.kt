@@ -1,6 +1,7 @@
 package ph.mcmod.csd.game
 
 import com.simibubi.create.AllTags
+import com.simibubi.create.content.contraptions.processing.BasinBlock
 import com.simibubi.create.content.contraptions.processing.BasinRecipe
 import com.simibubi.create.content.contraptions.processing.BasinTileEntity
 import com.simibubi.create.foundation.utility.recipe.RecipeFinder
@@ -31,6 +32,7 @@ interface InjectBasinTileEntity {
     var animationTicks: Double
     val steepingKey: Any
     var steepingDuration: Double?
+    var youtiaoDuration: Double?
     
     companion object {
         const val BOILING = false
@@ -39,54 +41,69 @@ interface InjectBasinTileEntity {
             return (te.temperature - 25) / 75
         }
         @JvmStatic
-        fun tickBoil(te: BasinTileEntity) {
-            if (!BOILING) return
+        fun tick(te: BasinTileEntity) {
             te as InjectBasinTileEntity
-            val t1 = mapTemperature(te)
-            val t2 = t1.pow(3)
-            te.animationTicks += t2
+            val world = te.world ?: return
+            val facing = te.cachedState.get(BasinBlock.FACING)
             
-            val world = te.world as? ServerWorld ?: return
-            val blockPos = te.pos
-            if (world.getBlockState(blockPos.down()).isIn(AllTags.AllBlockTags.FAN_HEATERS.tag) && run {
-                  Transaction.openOuter().use { transaction ->
-                      for (view in (te.getFluidStorage(null) ?: return@use).iterator(transaction)) {
-                          if (view.resource.fluid.isIn(FluidTags.WATER)) {
-                              return@run true
-                          }
-                      }
-                  }
-                  false
-              }) {
-                
-                te.temperature = min(100.0, te.temperature + 0.5)
-
-//            boilingPoses += blockPos
-                val pressure = run {
-                    val upPos = blockPos.up()
-                    VoxelShapes.adjacentSidesCoverSquare(te.cachedState.getOutlineShape(world, blockPos), world.getBlockState(upPos).getOutlineShape(world, upPos), Direction.UP)
-                }
-                if (pressure) {
-                
-                }
-                val pos = blockPos.toCenter()
-                val random = world.random
-                if (random.nextDouble() < t2) {
-                    if (random.nextInt(2) == 0) {
-                        world.spreadParticles(ParticleTypes.SPLASH, false, pos, 0.1, 0.0, 1)
-                        world.spreadParticles(ParticleTypes.BUBBLE, false, pos, 0.1, 0.0, 1)
-                        if (random.nextInt(4) == 0) {
-                            world.spreadParticles(ParticleTypes.POOF, false, pos, 0.1, 0.0, 1)
-                        }
+            if (facing != Direction.DOWN) {
+                val youtiaoProgress = te.youtiaoDuration ?: if (world.time % 100 == 0L) 0.0 else null
+                if (youtiaoProgress != null) {
+                    if (youtiaoProgress > 0) {
+                        te.youtiaoDuration = youtiaoProgress - 1
+                    } else {
+                        te.youtiaoDuration = null
                     }
                 }
-            } else {
-                te.apply {
-                    temperature = max(25.0, temperature - 0.5)
-                }
-//            boilingPoses-=blockPos
             }
-            te.notifyUpdate()
+            if (BOILING) {
+                val t1 = mapTemperature(te)
+                val t2 = t1.pow(3)
+                te.animationTicks += t2
+                
+                val blockPos = te.pos
+                if (world.getBlockState(blockPos.down()).isIn(AllTags.AllBlockTags.PASSIVE_BOILER_HEATERS.tag) && run {
+                      Transaction.openOuter().use { transaction ->
+                          for (view in (te.getFluidStorage(null) ?: return@use).iterator(transaction)) {
+                              if (view.resource.fluid.isIn(FluidTags.WATER)) {
+                                  return@run true
+                              }
+                          }
+                      }
+                      false
+                  }) {
+                    
+                    te.temperature = min(100.0, te.temperature + 0.5)
+                    
+                    //            boilingPoses += blockPos
+                    val pressure = run {
+                        val upPos = blockPos.up()
+                        VoxelShapes.adjacentSidesCoverSquare(te.cachedState.getOutlineShape(world, blockPos), world.getBlockState(upPos).getOutlineShape(world, upPos), Direction.UP)
+                    }
+                    if (pressure) {
+                    
+                    }
+                    val pos = blockPos.toCenter()
+                    val random = world.random
+                    if (world is ServerWorld) {
+                        if (random.nextDouble() < t2) {
+                            if (random.nextInt(2) == 0) {
+                                world.spreadParticles(ParticleTypes.SPLASH, false, pos, 0.1, 0.0, 1)
+                                world.spreadParticles(ParticleTypes.BUBBLE, false, pos, 0.1, 0.0, 1)
+                                if (random.nextInt(4) == 0) {
+                                    world.spreadParticles(ParticleTypes.POOF, false, pos, 0.1, 0.0, 1)
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    te.apply {
+                        temperature = max(25.0, temperature - 0.5)
+                    }
+                    //            boilingPoses-=blockPos
+                }
+                te.notifyUpdate()
+            }
         }
         
         @JvmStatic

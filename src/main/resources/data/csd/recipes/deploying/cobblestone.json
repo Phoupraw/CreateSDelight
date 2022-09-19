@@ -1,0 +1,10 @@
+{
+  "type": "create:deploying",
+  "ingredients": [
+    {"item": "stone"},
+    {"tag": "c:pickaxes"}
+  ],
+  "results": [
+    {"item": "cobblestone", "count": 1}
+  ]
+}

@@ -12,6 +12,7 @@
     "MixinDepotTileEntity",
     "MixinFarmersDelightMod",
     "MixinFluidBlock",
+    "MixinFluidTankTileEntity",
     "MixinItemDrainItemHandler",
     "MixinItemDrainTileEntity",
     "MixinItems",

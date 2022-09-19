@@ -12,11 +12,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import ph.mcmod.csd.game.InjectDepotBehaviour;
-@Mixin(value = DepotBehaviour.class, remap = false)
+@Mixin(value = DepotBehaviour.class)
 public abstract class MixinDepotBehaviour extends TileEntityBehaviour implements InjectDepotBehaviour {
-    private long startTime=-1;
+    private long startTime = -1;
     private int flippingCountdown = -1;
-    @Shadow
+    @Shadow(remap = false)
     TransportedItemStack heldItem;
 
     public MixinDepotBehaviour(SmartTileEntity te) {
@@ -49,15 +49,18 @@ public abstract class MixinDepotBehaviour extends TileEntityBehaviour implements
         this.flippingCountdown = flippingCountdown;
 //        tileEntity.notifyUpdate();
     }
-    @Inject(method = "setHeldItem", at = @At("RETURN"))
-    private void center(TransportedItemStack heldItem, CallbackInfo ci) {
-        InjectDepotBehaviour.center((DepotBehaviour) (Object) this, heldItem);
-    }
+
+@Inject(method = "setHeldItem", at = @At("RETURN"), remap = false)
+private void center(TransportedItemStack heldItem, CallbackInfo ci) {
+    InjectDepotBehaviour.center((DepotBehaviour) (Object) this, heldItem);
+}
+
     @Inject(method = "write", at = @At("HEAD"))
     private void write(NbtCompound compound, boolean clientPacket, CallbackInfo ci) {
 //        compound.putLong("startTime",getStartTime());
-        compound.putInt("flippingCountdown",getFlippingCountdown());
+        compound.putInt("flippingCountdown", getFlippingCountdown());
     }
+
     @Inject(method = "read", at = @At("HEAD"))
     private void read(NbtCompound compound, boolean clientPacket, CallbackInfo ci) {
 //        setStartTime(compound.getLong("startTime"));

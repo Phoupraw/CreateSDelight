@@ -1,0 +1,17 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {"item": "csd:casing"},
+  "transitionalItem": {"item": "csd:casing"},
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {"item": "csd:casing"},
+        {"item": "csd:marinate_diced_pork"}
+      ],
+      "results": [{"item": "csd:casing"}]
+    }
+  ],
+  "results": [{"item": "csd:ready_sausage", "count": 1}],
+  "loops": 6
+}

@@ -20,14 +20,15 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import ph.mcmod.csd.game.InjectBasinRecipe;
 
 import java.util.List;
-@Mixin(value = BasinRecipe.class,remap = false)
+@Mixin(value = BasinRecipe.class)
 public class MixinBasinRecipe {
-    @Inject(method = "apply(Lcom/simibubi/create/content/contraptions/processing/BasinTileEntity;Lnet/minecraft/recipe/Recipe;Z)Z",at = @At(value = "INVOKE",target = "Ljava/util/List;sort(Ljava/util/Comparator;)V"),locals = LocalCapture.CAPTURE_FAILHARD)
-    private static void removeContainer(BasinTileEntity basin, Recipe<?> recipe, boolean test, CallbackInfoReturnable<Boolean> cir, boolean isBasinRecipe, Storage<ItemVariant>  availableItems, Storage<FluidVariant> availableFluids, BlazeBurnerBlock.HeatLevel heat, List <ItemStack> recipeOutputItems, List <FluidStack>recipeOutputFluids, List <Ingredient>ingredients){
-        InjectBasinRecipe.removeContainer(basin,recipe,test,isBasinRecipe,availableItems,availableFluids,heat,recipeOutputItems,recipeOutputFluids,ingredients);
-    }
-    @Inject(method = "apply(Lcom/simibubi/create/content/contraptions/processing/BasinTileEntity;Lnet/minecraft/recipe/Recipe;Z)Z",at = @At(value = "INVOKE",target = "Lcom/simibubi/create/content/contraptions/processing/BasinTileEntity;acceptOutputs(Ljava/util/List;Ljava/util/List;Lnet/fabricmc/fabric/api/transfer/v1/transaction/TransactionContext;)Z"),locals = LocalCapture.CAPTURE_FAILHARD)
-    private static void modifyResult(BasinTileEntity basin, Recipe<?> recipe, boolean test, CallbackInfoReturnable<Boolean> cir, boolean isBasinRecipe, Storage<ItemVariant>  availableItems, Storage<FluidVariant> availableFluids, BlazeBurnerBlock.HeatLevel heat, List <ItemStack> recipeOutputItems, List <FluidStack>recipeOutputFluids, List <Ingredient>ingredients, List<FluidIngredient> fluidIngredients, Transaction t, boolean fluidsAffected){
-        InjectBasinRecipe.modifyResult(basin,recipe,test,isBasinRecipe,availableItems,availableFluids,heat,recipeOutputItems,recipeOutputFluids,ingredients,fluidIngredients,t,fluidsAffected);
-    }
+@Inject(method = "apply(Lcom/simibubi/create/content/contraptions/processing/BasinTileEntity;Lnet/minecraft/recipe/Recipe;Z)Z", at = @At(value = "INVOKE", target = "Ljava/util/List;sort(Ljava/util/Comparator;)V"), locals = LocalCapture.CAPTURE_FAILHARD)
+private static void removeContainer(BasinTileEntity basin, Recipe<?> recipe, boolean test, CallbackInfoReturnable<Boolean> cir, boolean isBasinRecipe, Storage<ItemVariant> availableItems, Storage<FluidVariant> availableFluids, BlazeBurnerBlock.HeatLevel heat, List<ItemStack> recipeOutputItems, List<FluidStack> recipeOutputFluids, List<Ingredient> ingredients) {
+    InjectBasinRecipe.removeContainer(basin, recipe, test, isBasinRecipe, availableItems, availableFluids, heat, recipeOutputItems, recipeOutputFluids, ingredients);
+}
+
+@Inject(method = "apply(Lcom/simibubi/create/content/contraptions/processing/BasinTileEntity;Lnet/minecraft/recipe/Recipe;Z)Z", at = @At(value = "INVOKE", target = "Lcom/simibubi/create/content/contraptions/processing/BasinTileEntity;acceptOutputs(Ljava/util/List;Ljava/util/List;Lnet/fabricmc/fabric/api/transfer/v1/transaction/TransactionContext;)Z"), locals = LocalCapture.CAPTURE_FAILHARD)
+private static void modifyResult(BasinTileEntity basin, Recipe<?> recipe, boolean test, CallbackInfoReturnable<Boolean> cir, boolean isBasinRecipe, Storage<ItemVariant> availableItems, Storage<FluidVariant> availableFluids, BlazeBurnerBlock.HeatLevel heat, List<ItemStack> recipeOutputItems, List<FluidStack> recipeOutputFluids, List<Ingredient> ingredients, List<FluidIngredient> fluidIngredients, Transaction t, boolean fluidsAffected) {
+    InjectBasinRecipe.modifyResult(basin, recipe, test, isBasinRecipe, availableItems, availableFluids, heat, recipeOutputItems, recipeOutputFluids, ingredients, fluidIngredients, t, fluidsAffected);
+}
 }

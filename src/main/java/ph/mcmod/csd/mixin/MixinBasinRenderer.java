@@ -24,7 +24,7 @@ import ph.mcmod.csd.game.InjectBasinTileEntity;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-@Mixin(value = BasinRenderer.class, remap = false)
+@Mixin(value = BasinRenderer.class)
 public abstract class MixinBasinRenderer extends SmartTileEntityRenderer<BasinTileEntity> {
     @Shadow
     protected abstract float renderFluids(BasinTileEntity basin, float partialTicks, MatrixStack ms, VertexConsumerProvider buffer, int light, int overlay);
@@ -78,10 +78,10 @@ public abstract class MixinBasinRenderer extends SmartTileEntityRenderer<BasinTi
         InjectBasinRenderer.changeHeight((BasinRenderer) (Object) this, args, te, partialTicks, ms, buffer, light, overlay, fluidLevel, level, pos, random, inv, stackCount, stacks, anglePartition, stack);
     }
 
-    @Inject(method = "renderSafe(Lcom/simibubi/create/content/contraptions/processing/BasinTileEntity;FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;II)V", at = @At(value = "INVOKE", target = "Lcom/jozufozu/flywheel/util/transform/TransformStack;rotateX(D)Ljava/lang/Object;", shift = At.Shift.AFTER, ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void rotate(BasinTileEntity basin, float partialTicks, MatrixStack ms, VertexConsumerProvider buffer, int light, int overlay, CallbackInfo ci, float fluidLevel, float level, BlockPos pos, Random r, Vec3d baseVector, Storage<ItemVariant> inv, int itemCount, List<ItemStack> stacks, float anglePartition, Iterator<ItemStack> stacksIterator, ItemStack stack, Vec3d itemPosition) {
-        InjectBasinRenderer.rotate((BasinRenderer) (Object) this, te, partialTicks, ms, buffer, light, overlay, fluidLevel, level, pos, random, inv, stackCount, stacks, anglePartition, stack);
-    }
+@Inject(method = "renderSafe(Lcom/simibubi/create/content/contraptions/processing/BasinTileEntity;FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;II)V", at = @At(value = "INVOKE", target = "Lcom/jozufozu/flywheel/util/transform/TransformStack;rotateX(D)Ljava/lang/Object;", shift = At.Shift.AFTER, ordinal = 0, remap = false), locals = LocalCapture.CAPTURE_FAILHARD)
+private void rotate(BasinTileEntity basin, float partialTicks, MatrixStack ms, VertexConsumerProvider buffer, int light, int overlay, CallbackInfo ci, float fluidLevel, float level, BlockPos pos, Random r, Vec3d baseVector, Storage<ItemVariant> inv, int itemCount, List<ItemStack> stacks, float anglePartition, Iterator<ItemStack> stacksIterator, ItemStack stack, Vec3d itemPosition) {
+    InjectBasinRenderer.rotate((BasinRenderer) (Object) this, te, partialTicks, ms, buffer, light, overlay, fluidLevel, level, pos, random, inv, stackCount, stacks, anglePartition, stack);
+}
 
     @Redirect(method = "renderSafe(Lcom/simibubi/create/content/contraptions/processing/BasinTileEntity;FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;II)V", at = @At(value = "INVOKE", target = "Lcom/simibubi/create/content/contraptions/processing/BasinRenderer;renderFluids(Lcom/simibubi/create/content/contraptions/processing/BasinTileEntity;FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;II)F"))
     private float calcFluidLevel(BasinRenderer renderer, BasinTileEntity te, float partialTicks, MatrixStack ms, VertexConsumerProvider buffer, int light, int overlay) {
@@ -95,5 +95,10 @@ public abstract class MixinBasinRenderer extends SmartTileEntityRenderer<BasinTi
 //        ms.push();
         renderFluids(basin, partialTicks, ms, buffer, light, overlay);
 //        ms.pop();
+    }
+
+    @Inject(method = "renderSafe(Lcom/simibubi/create/content/contraptions/processing/BasinTileEntity;FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;II)V", at = @At(value = "FIELD", target = "Lcom/simibubi/create/content/contraptions/processing/BasinTileEntity;visualizedOutputItems:Ljava/util/List;"))
+    private void renderYoutiao(BasinTileEntity basin, float partialTicks, MatrixStack ms, VertexConsumerProvider buffer, int light, int overlay, CallbackInfo ci) {
+        InjectBasinRenderer.renderYoutiao(basin, partialTicks, ms, buffer, light, overlay);
     }
 }

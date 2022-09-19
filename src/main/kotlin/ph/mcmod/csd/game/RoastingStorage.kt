@@ -53,7 +53,7 @@ class RoastingStorage(var te: BracketedKineticTileEntity) : SingleStackStorage()
     fun findRecipe(itemStack: ItemStack = this.stack): SingleRecipe? {
         te.world?.also { world ->
             for (direction in Direction.values()) {
-                if (world.getBlockState(te.pos.offset(direction)).isIn(AllBlockTags.FAN_HEATERS.tag)) {
+                if (world.getBlockState(te.pos.offset(direction)).isIn(AllBlockTags.PASSIVE_BOILER_HEATERS.tag)) {
                     return InjectItemDrainTileEntity.getRecipe(world, itemStack, MyRegistries.MyRecipeTypes.ROASTING)
                 }
             }

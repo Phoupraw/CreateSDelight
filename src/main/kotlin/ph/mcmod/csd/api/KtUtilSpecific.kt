@@ -2,11 +2,13 @@
 
 package ph.mcmod.csd.api
 
+import kotlinx.serialization.json.Json
 import net.fabricmc.fabric.api.transfer.v1.item.base.SingleStackStorage
 import net.minecraft.client.MinecraftClient
 import net.minecraft.entity.LivingEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
+import net.minecraft.tag.TagKey
 import net.minecraft.util.Hand
 import net.minecraft.world.World
 import ph.mcmod.kum.*
@@ -35,6 +37,7 @@ class HandStackStorage(val livingEntity: LivingEntity, val hand: Hand) : SingleS
     }
 }
 
+fun Identifiable.toIngredient() = """{"${if (this is TagKey<*>) "tag" else "item"}":"${this.id}"}"""
 //class DoubleInItemStack(val itemStack: ItemStack, val key: String) : ReadWriteProperty<Any?, Double?> {
 //    override fun getValue(thisRef: Any?, property: KProperty<*>): Double? {
 //        return itemStack.nbt?.getOrNull(key, NbtCompound::getDouble)

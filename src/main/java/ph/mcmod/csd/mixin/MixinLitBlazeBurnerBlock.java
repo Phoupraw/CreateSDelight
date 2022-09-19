@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import ph.mcmod.csd.game.InjectLitBlazeBurnerBlock;
 
 import java.util.Random;
-@Mixin(value = LitBlazeBurnerBlock.class, remap = false)
+@Mixin(value = LitBlazeBurnerBlock.class)
 public class MixinLitBlazeBurnerBlock {
     private final ThreadLocal<BlockState> state = new ThreadLocal<>();
     private final ThreadLocal<World> world = new ThreadLocal<>();
@@ -30,6 +30,6 @@ public class MixinLitBlazeBurnerBlock {
 
     @ModifyArg(method = "randomDisplayTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addImportantParticle(Lnet/minecraft/particle/ParticleEffect;ZDDDDDD)V"), index = 3)
     private double modifyY(double y) {
-        return InjectLitBlazeBurnerBlock.modifyY(y,state.get(),world.get(), pos.get(), random.get());
+        return InjectLitBlazeBurnerBlock.modifyY(y, state.get(), world.get(), pos.get(), random.get());
     }
 }

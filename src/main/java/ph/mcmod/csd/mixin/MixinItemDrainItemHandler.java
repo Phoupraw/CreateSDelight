@@ -5,9 +5,9 @@ import com.simibubi.create.content.contraptions.fluids.actors.ItemDrainTileEntit
 import net.minecraft.util.math.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-@Mixin(value = ItemDrainItemHandler.class, remap = false)
+@Mixin(value = ItemDrainItemHandler.class)
 public class MixinItemDrainItemHandler {
-    @Shadow
+    @Shadow(remap = false)
     private ItemDrainTileEntity te;
 
     @Shadow

@@ -27,7 +27,7 @@ interface InjectBasinRenderer {
     companion object {
         @JvmStatic
         fun changeHeight(renderer: BasinRenderer, args: Args, te: BasinTileEntity, partialTicks: Float, ms: MatrixStack, buffer: VertexConsumerProvider, light: Int, overlay: Int, fluidLevel: Float, level: Float, pos: BlockPos, random: Random, inv: Storage<ItemVariant>, stackCount: Int, stacks: MutableList<ItemStack>, anglePartition: Float, stack: ItemStack) {
-            if (!InjectBasinTileEntity.BOILING)return
+            if (!InjectBasinTileEntity.BOILING) return
             te as InjectBasinTileEntity
             val t1 = InjectBasinTileEntity.mapTemperature(te)
             val world = te.world ?: return
@@ -55,8 +55,9 @@ interface InjectBasinRenderer {
             val partial1 = ((world.time + partialTicks) % cycle1 / cycle1 + hashOffset) * PI * 2
             val sin1 = sin(partial1)
 //        args[1] = degree + sin1 * 360 * hashOffset.sign
-    
-        }    @JvmStatic
+        
+        }
+        @JvmStatic
         fun changeLevel(renderer: BasinRenderer, value: Float, min: Float, max: Float, te: BasinTileEntity, partialTicks: Float, ms: MatrixStack, buffer: VertexConsumerProvider, light: Int, overlay: Int): Float {
 //        println(partialTicks)
             if (te.pos.x == 23) {
@@ -68,7 +69,7 @@ interface InjectBasinRenderer {
         @Environment(EnvType.CLIENT)
         @JvmStatic
         fun rotate(renderer: BasinRenderer, te: BasinTileEntity, partialTicks: Float, ms: MatrixStack, buffer: VertexConsumerProvider, light: Int, overlay: Int, fluidLevel: Float, level: Float, pos: BlockPos, random: Random, inv: Storage<ItemVariant>, stackCount: Int, stacks: MutableList<ItemStack>, anglePartition: Float, stack: ItemStack) {
-            if (!InjectBasinTileEntity.BOILING)return
+            if (!InjectBasinTileEntity.BOILING) return
             te as InjectBasinTileEntity
             val world = te.world ?: return
             val hashCode = stack.item.hashCode()
@@ -104,11 +105,11 @@ interface InjectBasinRenderer {
             val totalUnits: Float = basin.getTotalFluidUnits(partialTicks)
             if (totalUnits < 1)
                 return 0f
-        
+            
             var fluidLevel = MathHelper.clamp(totalUnits / (FluidConstants.BUCKET * 2), 0f, 1f)
-        
+            
             fluidLevel = 1 - (1 - fluidLevel) * (1 - fluidLevel)
-        
+            
             val xMin = 2 / 16f
             val xMax = 2 / 16f
             val yMin = 2 / 16f
@@ -117,6 +118,13 @@ interface InjectBasinRenderer {
             val zMax = 14 / 16f
             return yMax
         }
-    
+        
+        @JvmStatic
+        fun renderYoutiao(te: BasinTileEntity, partialTicks: Float, ms: MatrixStack, buffer: VertexConsumerProvider, light: Int, overlay: Int) {
+            te as InjectBasinTileEntity
+            val youtiaoDuration = te.youtiaoDuration ?: return
+            
+        }
+        
     }
 }

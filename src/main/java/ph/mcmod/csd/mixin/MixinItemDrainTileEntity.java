@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import ph.mcmod.csd.game.InjectItemDrainTileEntity;
-@Mixin(value = ItemDrainTileEntity.class, remap = false)
+@Mixin(value = ItemDrainTileEntity.class)
 public abstract class MixinItemDrainTileEntity implements InjectItemDrainTileEntity {
     private int toastingStage;
 
@@ -34,16 +34,16 @@ public abstract class MixinItemDrainTileEntity implements InjectItemDrainTileEnt
         this.toastingStage = toastingStage;
     }
 
-    @Shadow
+    @Shadow(remap = false)
     TransportedItemStack heldItem;
 
-    @Shadow
+    @Shadow(remap = false)
     protected int processingTicks;
 
-    @Shadow
+    @Shadow(remap = false)
     protected abstract float itemMovementPerTick();
 
-    @Inject(method = "tick", at = @At("HEAD"))
+    @Inject(method = "tick", at = @At("HEAD"), remap = false)
     private void particle(CallbackInfo ci) {
 //        MixinDelegates.particle((ItemDrainTileEntity) (Object) this, heldItem);
         InjectItemDrainTileEntity.particle((ItemDrainTileEntity) (Object) this, heldItem);
@@ -109,8 +109,8 @@ public abstract class MixinItemDrainTileEntity implements InjectItemDrainTileEnt
         return InjectItemDrainTileEntity.cancelMovement((ItemDrainTileEntity) (Object) this, heldItem, itemMovementPerTick());
     }
 
-    @Inject(method = "tryInsertingFromSide", at = @At("HEAD"),cancellable = true)
+    @Inject(method = "tryInsertingFromSide", at = @At("HEAD"), cancellable = true)
     private void cancelInput(TransportedItemStack transportedStack, Direction side, boolean simulate, CallbackInfoReturnable<ItemStack> cir) {
-        InjectItemDrainTileEntity.cancelInput((ItemDrainTileEntity) (Object) this, heldItem, transportedStack, side, simulate,cir);
+        InjectItemDrainTileEntity.cancelInput((ItemDrainTileEntity) (Object) this, heldItem, transportedStack, side, simulate, cir);
     }
 }

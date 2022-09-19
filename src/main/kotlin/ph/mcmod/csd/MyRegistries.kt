@@ -6,7 +6,11 @@ import com.nhoryzon.mc.farmersdelight.item.Foods
 import com.nhoryzon.mc.farmersdelight.registry.ItemsRegistry
 import com.simibubi.create.*
 import com.simibubi.create.api.behaviour.BlockSpoutingBehaviour
+import com.simibubi.create.content.contraptions.components.mixer.MixingRecipe
+import com.simibubi.create.content.contraptions.processing.ProcessingRecipeBuilder
+import com.simibubi.create.content.contraptions.processing.ProcessingRecipeBuilder.ProcessingRecipeParams
 import com.simibubi.create.content.logistics.block.mechanicalArm.ArmInteractionPointType
+import com.simibubi.create.content.logistics.trains.track.TrackBlockOutline.result
 import com.simibubi.create.foundation.data.SharedProperties
 import com.simibubi.create.foundation.networking.AllPackets
 import com.simibubi.create.foundation.networking.SimplePacketBase
@@ -28,17 +32,20 @@ import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.entity.EntityType
 import net.minecraft.entity.effect.StatusEffectInstance
 import net.minecraft.entity.effect.StatusEffects
+import net.minecraft.fluid.Fluid
 import net.minecraft.fluid.Fluids
 import net.minecraft.item.*
 import net.minecraft.loot.LootPool
 import net.minecraft.loot.entry.ItemEntry
 import net.minecraft.particle.DefaultParticleType
+import net.minecraft.recipe.Ingredient
 import net.minecraft.tag.TagKey
 import net.minecraft.util.Identifier
 import net.minecraft.util.registry.Registry
 import org.jetbrains.annotations.ApiStatus
 import ph.mcmod.csd.MyRegistries.MyItems.MUSHROOM_SOUP
 import ph.mcmod.csd.MyRegistries.MyItems.WATER_BOWL
+import ph.mcmod.csd.api.toIngredient
 import ph.mcmod.csd.fluid.AcidFluid
 import ph.mcmod.csd.fluid.TomatoSauceFluid
 import ph.mcmod.csd.game.*
@@ -152,6 +159,14 @@ object MyRegistries : RegistryHelper(CSD, { MyItems.STEAMED_BUNS.defaultStack })
         val SAUSAGE = Item(ItemSettings())
           .register("sausage")
           .lang("腊肠")
+        @JvmField
+        val CHOPPED_ONION = Item(ItemSettings())
+          .register("chopped_onion")
+          .lang("洋葱末")
+        @JvmField
+        val CHIPOLATA = Item(ItemSettings())
+          .register("chipolata")
+          .lang("契普拉塔小香肠")
         
         @JvmField
         val WATER_BOWL = WaterBowlItem(ItemSettings())
@@ -353,7 +368,6 @@ object MyRegistries : RegistryHelper(CSD, { MyItems.STEAMED_BUNS.defaultStack })
           .add(MyItems.CHICKEN_STICK)
         arrpHelper.packAfter.addRecipe_barbecue(MyItems.RAW_CHICKEN_STICK, MyItems.CHICKEN_STICK)
         arrpHelper.packAfter.addRecipe_steaming(MyItemTags.DOUGHS, MyItems.STEAMED_BUNS)
-//        arrpHelper.packAfter.addRecipe_roasting()
         SteepingRecipe.loadClass()
         val animalsLootTables = listOf(EntityType.PIG, EntityType.SHEEP, EntityType.COW).map { it.lootTableId }
         LootTableEvents.MODIFY.register { resourceManager, lootManager, identifier, builder, lootTableSource ->
@@ -361,7 +375,9 @@ object MyRegistries : RegistryHelper(CSD, { MyItems.STEAMED_BUNS.defaultStack })
                 builder.pool(LootPool.builder().with(ItemEntry.builder(MyItems.INTESTINE)))
             }
         }
-        arrpHelper.packAfter.addLootTable_single(MyBlocks.DRYING_RACK,AllBlocks.SHAFT.id)
+        arrpHelper.packAfter.addLootTable_single(MyBlocks.DRYING_RACK, AllBlocks.SHAFT.id)
+        arrpHelper.packAfter.addRecipe_deploying(MyItems.CHIPOLATA, 1, MyItems.SAUSAGE, MyItems.CHOPPED_ONION)
+        BraisingRecipe.loadClass()
         runAtClient {
         
         }
@@ -377,6 +393,7 @@ object MyRegistries : RegistryHelper(CSD, { MyItems.STEAMED_BUNS.defaultStack })
           .add(ItemsRegistry.BARBECUE_STICK.get())
         arrpHelper.packAfter.addRecipe_craftingShapeless(MyItems.CHICKEN_STICK, 1, Items.STICK, ItemsRegistry.CHICKEN_CUTS.get())
         arrpHelper.packAfter.addRecipe_roasting(MyItems.RAW_ROAST_CHICKEN_BLOCK, MyItems.ROAST_CHICKEN_BLOCK)
+        arrpHelper.packAfter.addRecipe_mixing(MyItems.CHOPPED_ONION, 2, ItemsRegistry.ONION.get())
     }
     
     fun RuntimeResourcePack.addRecipe_barbecue(ingredient: Identifiable, result: Identifiable) = addRecipe_barbecue(ingredient, result, recipeId = id(ingredient.id.path).pre("barbecue/"))
@@ -411,6 +428,24 @@ fun RuntimeResourcePack.addRecipe_roasting(ingredient: Identifiable, result: Ide
     return addRecipe_single(Identifier(CSD, "roasting"), ingredient, result, duration, recipeId)
 }
 
-//fun RuntimeResourcePack.addRecipe_mixing(result: Identifiable, count: Int, vararg ingredients: Identifiable, duration: Double = SingleRecipe.DEFUALT_DURATION, recipeId: Identifier = result.id.pre("roasting/")): ByteArray {
-//    return addRecipe_single(Identifier(MOD_ID, "roasting"), ingredient, result, duration, recipeId)
-//}
+fun RuntimeResourcePack.addRecipe_mixing(result: Identifiable, count: Int, vararg ingredients: Identifiable, fluidIngredient: Pair<Identifiable, Int>? = null, recipeId: Identifier = result.id.pre("mixing/")): ByteArray {
+    return addData(recipeId.preRecipes().json(), """{
+  "type": "create:mixing",
+  "ingredients": [
+    ${ingredients.joinToString(",") { it.toIngredient() }}
+    ${fluidIngredient?.run { """,{"fluid":"${fluidIngredient.first.id}","amount":"${fluidIngredient.second}"}""" }}
+  ],
+  "results": [{"item": "${result.id}", "count": $count}]
+}""".toByteArray())
+}
+
+fun RuntimeResourcePack.addRecipe_deploying(result: Identifiable, count: Int, base: Identifiable, deployee: Identifiable, recipeId: Identifier = result.id.pre("deploying/")): ByteArray {
+    return addData(recipeId.preRecipes().json(), """{
+  "type": "create:mixing",
+  "ingredients": [
+    {"item":"${base.id}"},
+    {"item":"${deployee.id}"}
+  ],
+  "results": [{"item": "${result.id}", "count": $count}]
+}""".toByteArray())
+}
